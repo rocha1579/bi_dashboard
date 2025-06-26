@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamento - {{ plano.title() }}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Estilos básicos mantidos */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .plano-info {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .plano-nome {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .plano-preco {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .payment-method {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e0e6ed;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .payment-method:hover {
+            border-color: #3498db;
+            transform: translateY(-2px);
+        }
+
+        .payment-method.active {
+            border-color: #3498db;
+            background: #e3f2fd;
+        }
+
+        .method-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .method-icon {
+            font-size: 2rem;
+        }
+
+        .method-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .qr-code {
+            max-width: 250px;
+            width: 100%;
+            height: auto;
+            border: 3px solid #3498db;
+            border-radius: 10px;
+            margin: 15px auto;
+            display: block;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            text-align: center;
+            text-decoration: none;
+            margin-bottom: 10px;
+        }
+
+        .btn-mercadopago {
+            background: linear-gradient(135deg, #009ee3, #32bcad);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .payment-form {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .payment-form.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💳 Finalizar Pagamento</h1>
+        </div>
+
+        <div class="plano-info">
+            <div class="plano-nome">
+                {% if plano == 'basico' %}
+                    🚀 Plano Básico
+                {% elif plano == 'premium' %}
+                    💎 Plano Premium
+                {% else %}
+                    🔥 Plano Pro
+                {% endif %}
+            </div>
+            <div class="plano-preco">R$ {{ "%.2f"|format(valor) }}</div>
+            <div>Escolha sua forma de pagamento</div>
+        </div>
+
+        <div class="payment-methods">
+            <!-- PIX -->
+            <div class="payment-method active" id="pix-method" onclick="selectPaymentMethod('pix')">
+                <div class="method-header">
+                    <div class="method-icon">📱</div>
+                    <div class="method-title">PIX</div>
+                </div>
+                <div class="method-content">
+                    <p><strong>Pagamento único</strong></p>
+                    <p>Escaneie o QR Code ou use a chave PIX</p>
+                </div>
+            </div>
+
+            <!-- Mercado Pago -->
+            <div class="payment-method" id="mercadopago-method" onclick="selectPaymentMethod('mercadopago')">
+                <div class="method-header">
+                    <div class="method-icon">💰</div>
+                    <div class="method-title">Mercado Pago</div>
+                </div>
+                <div class="method-content">
+                    <p><strong>Assinatura mensal</strong></p>
+                    <p>Cartão de crédito, débito ou saldo</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulário PIX -->
+        <div id="pix-form" class="payment-form active">
+            <!-- <h3 style="text-align: center; margin-bottom: 15px;">QR Code Banco Inter</h3>
+            <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-5RZOigbFMaQ7g8JH1Gs9rmSpSKxWG9.png" alt="QR Code PIX Banco Inter" class="qr-code"> -->
+            
+            <div style="text-align: center; margin: 15px 0;">
+                <!-- <p><strong>Nome:</strong> GABRIEL ROCHA ALVES</p> -->
+                <p><strong>Chave PIX:</strong> (31) 99512-0154</p>
+            </div>
+        </div>
+
+        <!-- Formulário Mercado Pago -->
+        <div id="mercadopago-form" class="payment-form">
+            <h3 style="text-align: center; margin-bottom: 20px;">Assinatura via Mercado Pago</h3>
+            
+            {% if plano == 'basico' %}
+                <a href="https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=2c9380849763daeb0197697bbcd3023b" class="btn btn-mercadopago" target="_blank">
+                    Assinar Plano Básico - R$ 25,00/mês
+                </a>
+            {% elif plano == 'premium' %}
+                <a href="https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=2c9380849764e81a0197697d371601cd" class="btn btn-mercadopago" target="_blank">
+                    Assinar Plano Premium - R$ 50,00/mês
+                </a>
+            {% else %}
+                <a href="https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=2c9380849763daeb0197697dd346023d" class="btn btn-mercadopago" target="_blank">
+                    Assinar Plano Pro - R$ 75,00/mês
+                </a>
+            {% endif %}
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="/" style="color: #7f8c8d; text-decoration: none;">⬅️ Voltar aos planos</a>
+        </div>
+    </div>
+
+    <script>
+        function selectPaymentMethod(method) {
+            // Atualizar visual dos métodos
+            document.querySelectorAll('.payment-method').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.getElementById(method + '-method').classList.add('active');
+            
+            // Mostrar formulário correspondente
+            document.querySelectorAll('.payment-form').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.getElementById(method + '-form').classList.add('active');
+        }
+    </script>
+</body>
+</html>

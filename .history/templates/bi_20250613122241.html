@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard BI - Análise de Dados</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header h1 i {
+            color: #3498db;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #229954);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        }
+
+        .btn-purple {
+            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            align-items: start;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-content {
+            padding: 25px;
+        }
+
+        .chart-card {
+            grid-column: span 2;
+        }
+
+        .chart-card .card-content {
+            height: 400px;
+            position: relative;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .help-text {
+            color: #7f8c8d;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            border: 2px solid #dee2e6;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 10% auto;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close {
+            font-size: 24px;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .close:hover {
+            opacity: 0.7;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .grafico-opcoes {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .opcao-grafico {
+            padding: 20px;
+            text-align: center;
+            border: 2px solid #e0e6ed;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .opcao-grafico:hover {
+            border-color: #3498db;
+            background: #e3f2fd;
+            transform: translateY(-2px);
+        }
+
+        .opcao-grafico i {
+            font-size: 2rem;
+            color: #3498db;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .opcao-grafico span {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-card {
+                grid-column: span 1;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .grafico-opcoes {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-chart-line"></i> Dashboard BI - Análise de Dados</h1>
+                <div class="nav-buttons">
+                    <a href="/" class="btn">📋 Início</a>
+                    <button class="btn btn-download" onclick="downloadExecutable()">
+                        <i class="fas fa-download"></i> Baixar Executável
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="dashboard-grid">
+                <!-- Configuração da Análise -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-cog"></i> Configuração da Análise</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-group">
+                            <label for="tipoAnalise">Tipo de Análise:</label>
+                            <select id="tipoAnalise" class="form-control">
+                                <option value="30 dias">30 dias</option>
+                                <option value="Últimos 3 meses">Últimos 3 meses</option>
+                                <option value="Últimos 6 meses">Últimos 6 meses</option>
+                                <option value="Anual">Anual</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="eixoY">Nome do Eixo Y:</label>
+                            <input type="text" id="eixoY" class="form-control" placeholder="Ex: Vendas, Receita, etc.">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="valores">Valores (separados por vírgula):</label>
+                            <textarea id="valores" class="form-control" rows="4" placeholder="Ex: 100, 150, 200, 180, 220..."></textarea>
+                            <small class="help-text">Digite os valores separados por vírgula</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Adicionar Novos Dados -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-plus"></i> Adicionar Dados</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="novoValor">Novo Valor:</label>
+                                <input type="number" id="novoValor" class="form-control" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="novoPeriodo">Período:</label>
+                                <input type="text" id="novoPeriodo" class="form-control" placeholder="Ex: Janeiro, Dia 1">
+                            </div>
+                        </div>
+                        <button class="btn btn-success" onclick="adicionarDado()">
+                            <i class="fas fa-plus"></i> Adicionar Dado
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Ações -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-tools"></i> Ações</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="action-buttons">
+                            <button class="btn btn-success" onclick="gerarAnalise()">
+                                <i class="fas fa-chart-bar"></i> Gerar Análise
+                            </button>
+                            <button class="btn btn-info" onclick="mostrarMedia()">
+                                <i class="fas fa-calculator"></i> Mostrar Média
+                            </button>
+                            <button class="btn btn-warning" onclick="exportarExcel()">
+                                <i class="fas fa-file-excel"></i> Exportar Excel
+                            </button>
+                            <button class="btn btn-purple" onclick="exportarPNG()" id="btnExportarPNG" style="display: none;">
+                                <i class="fas fa-image"></i> Exportar PNG
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estatísticas -->
+                <div class="card">
+                    <div class="card-header" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+                        <h2><i class="fas fa-chart-pie"></i> Estatísticas</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-value" id="mediaValor">-</div>
+                                <div class="stat-label">Média</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="totalPontos">-</div>
+                                <div class="stat-label">Total de Pontos</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="maiorValor">-</div>
+                                <div class="stat-label">Maior Valor</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="menorValor">-</div>
+                                <div class="stat-label">Menor Valor</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico -->
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-area"></i> Visualização</h2>
+                    </div>
+                    <div class="card-content">
+                        <canvas id="grafico"></canvas>
+                    </div>
+                </div>
+
+                <!-- Contato -->
+                <div class="card">
+                    <div class="card-header" style="background: linear-gradient(135deg, #27ae60, #229954);">
+                        <h2><i class="fas fa-envelope"></i> Contato</h2>
+                    </div>
+                    <div class="card-content">
+                        <form action="https://formsubmit.co/gabrielalvessr@gmail.com" method="POST">
+                            <div class="form-group">
+                                <label for="nome">Nome:</label>
+                                <input type="text" id="nome" name="nome" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email:</label>
+                                <input type="email" id="email" name="email" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="mensagem">Mensagem:</label>
+                                <textarea id="mensagem" name="mensagem" class="form-control" rows="3" required></textarea>
+                            </div>
+                            <input type="hidden" name="_subject" value="Contato Dashboard BI">
+                            <input type="hidden" name="_captcha" value="false">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-paper-plane"></i> Enviar Mensagem
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Senha -->
+    <div id="modalSenha" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-lock"></i> Acesso ao Sistema</h3>
+                <span class="close" onclick="fecharModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="senha">Digite a senha de acesso:</label>
+                    <input type="password" id="senha" class="form-control" placeholder="Senha">
+                    <small class="help-text">
+                        <strong>Senhas de acesso:</strong><br>
+                        • Básico: <code>Basic123*</code> (Gráfico de linha + PNG)<br>
+                        • Premium: <code>Premium2024$</code> (Todos os gráficos + PNG + Excel)<br>
+                        • Pro: <code>ProBI2024!@#</code> (Dashboard Pro completo)
+                    </small>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-success" onclick="verificarSenha()">
+                        <i class="fas fa-check"></i> Verificar
+                    </button>
+                    <button class="btn" onclick="fecharModal()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Tipo de Gráfico -->
+    <div id="modalTipoGrafico" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-chart-bar"></i> Escolha o Tipo de Gráfico</h3>
+                <span class="close" onclick="fecharModalTipo()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="grafico-opcoes">
+                    <div class="opcao-grafico" onclick="selecionarTipoGrafico('line')">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Linha</span>
+                    </div>
+                    <div class="opcao-grafico" onclick="selecionarTipoGrafico('bar')">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Barras</span>
+                    </div>
+                    <div class="opcao-grafico" onclick="selecionarTipoGrafico('doughnut')">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Pizza</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis globais
+        let valoresAtuais = [];
+        let periodosAtuais = [];
+        let graficoAtual = null;
+        let nivelAcesso = null; // Para controlar o nível de acesso
+
+        // Mapeamento de opções
+        const mapaOpcoes = {
+            "30 dias": "1",
+            "Últimos 3 meses": "2",
+            "Últimos 6 meses": "3",
+            "Anual": "4"
+        };
+
+        // Função para obter períodos
+        function obterPeriodos(opcao) {
+            const mesAtual = new Date().getMonth() + 1;
+            const nomesMeses = [
+                "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+                "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+            ];
+
+            switch (opcao) {
+                case "1":
+                    return {
+                        periodos: Array.from({ length: 30 }, (_, i) => `Dia ${i + 1}`),
+                        tipo: "Diário"
+                    };
+                case "2":
+                    const meses3 = [];
+                    for (let i = 2; i >= 0; i--) {
+                        const mes = (mesAtual - i - 1 + 12) % 12;
+                        meses3.push(nomesMeses[mes]);
+                    }
+                    return { periodos: meses3, tipo: "Mensal" };
+                case "3":
+                    const meses6 = [];
+                    for (let i = 5; i >= 0; i--) {
+                        const mes = (mesAtual - i - 1 + 12) % 12;
+                        meses6.push(nomesMeses[mes]);
+                    }
+                    return { periodos: meses6, tipo: "Mensal" };
+                case "4":
+                    return { periodos: nomesMeses, tipo: "Mensal" };
+                default:
+                    return { periodos: [], tipo: "" };
+            }
+        }
+
+        // Função para gerar gráfico
+        function gerarGrafico(periodos, valores, eixoY, tipo, tipoGrafico) {
+            const ctx = document.getElementById('grafico').getContext('2d');
+
+            if (graficoAtual) {
+                graficoAtual.destroy();
+            }
+
+            const cores = {
+                line: {
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    borderColor: 'rgba(52, 152, 219, 1)',
+                    pointBackgroundColor: 'rgba(231, 76, 60, 1)'
+                },
+                bar: {
+                    backgroundColor: 'rgba(52, 152, 219, 0.8)',
+                    borderColor: 'rgba(52, 152, 219, 1)'
+                },
+                doughnut: {
+                    backgroundColor: [
+                        'rgba(52, 152, 219, 0.8)',
+                        'rgba(231, 76, 60, 0.8)',
+                        'rgba(46, 204, 113, 0.8)',
+                        'rgba(241, 196, 15, 0.8)',
+                        'rgba(155, 89, 182, 0.8)',
+                        'rgba(230, 126, 34, 0.8)'
+                    ]
+                }
+            };
+
+            const config = {
+                type: tipoGrafico,
+                data: {
+                    labels: periodos,
+                    datasets: [{
+                        label: eixoY || 'Valores',
+                        data: valores,
+                        ...cores[tipoGrafico],
+                        borderWidth: 2,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `${tipoGrafico === 'line' ? 'Gráfico de Linha' : 
+                                   tipoGrafico === 'bar' ? 'Gráfico de Barras' : 
+                                   'Gráfico de Pizza'} - ${tipo} de ${eixoY || 'Valores'}`,
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            }
+                        },
+                        legend: {
+                            display: tipoGrafico === 'doughnut'
+                        }
+                    },
+                    scales: tipoGrafico !== 'doughnut' ? {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: eixoY || 'Valores'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: tipo
+                            }
+                        }
+                    } : {}
+                }
+            };
+
+            graficoAtual = new Chart(ctx, config);
+            
+            // Mostrar botão de exportar PNG após gerar o gráfico
+            document.getElementById('btnExportarPNG').style.display = 'block';
+        }
+
+        // Função para atualizar estatísticas
+        function atualizarEstatisticas(valores) {
+            if (valores.length === 0) {
+                document.getElementById('mediaValor').textContent = '-';
+                document.getElementById('totalPontos').textContent = '-';
+                document.getElementById('maiorValor').textContent = '-';
+                document.getElementById('menorValor').textContent = '-';
+                return;
+            }
+
+            const media = valores.reduce((a, b) => a + b, 0) / valores.length;
+            const maior = Math.max(...valores);
+            const menor = Math.min(...valores);
+
+            document.getElementById('mediaValor').textContent = media.toFixed(2);
+            document.getElementById('totalPontos').textContent = valores.length;
+            document.getElementById('maiorValor').textContent = maior.toFixed(2);
+            document.getElementById('menorValor').textContent = menor.toFixed(2);
+        }
+
+        // Função para iniciar análise
+        function gerarAnalise() {
+            const escolhaUsuario = document.getElementById('tipoAnalise').value;
+            const opcao = mapaOpcoes[escolhaUsuario];
+
+            if (!opcao) {
+                alert('Selecione um tipo de análise válido.');
+                return;
+            }
+
+            const { periodos, tipo } = obterPeriodos(opcao);
+            const eixoY = document.getElementById('eixoY').value.trim();
+            const entradaValores = document.getElementById('valores').value.trim();
+
+            try {
+                const valores = entradaValores.split(',').map(v => parseFloat(v.trim()));
+
+                if (valores.some(isNaN)) {
+                    alert('Todos os valores devem ser numéricos.');
+                    return;
+                }
+
+                if (valores.length !== periodos.length) {
+                    alert(`Você deve digitar exatamente ${periodos.length} valores.`);
+                    return;
+                }
+
+                valoresAtuais = valores;
+                periodosAtuais = periodos;
+
+                // Atualizar estatísticas
+                atualizarEstatisticas(valores);
+
+                // Mostrar modal de senha
+                document.getElementById('modalSenha').style.display = 'block';
+            } catch (error) {
+                alert('Erro ao processar os valores.');
+            }
+        }
+
+        // Função para verificar senha
+        function verificarSenha() {
+            const senha = document.getElementById('senha').value;
+            const eixoY = document.getElementById('eixoY').value.trim();
+            const { tipo } = obterPeriodos(mapaOpcoes[document.getElementById('tipoAnalise').value]);
+
+            if (senha === 'Basic123*') {
+                nivelAcesso = 'basico';
+                alert('Acesso básico liberado. Exibindo gráfico de linha + Exportação PNG disponível.');
+                gerarGrafico(periodosAtuais, valoresAtuais, eixoY, tipo, 'line');
+                fecharModal();
+            } else if (senha === 'Premium2024$') {
+                nivelAcesso = 'premium';
+                alert('Acesso premium liberado. Escolha o tipo de gráfico + Exportação PNG e Excel disponíveis.');
+                fecharModal();
+                document.getElementById('modalTipoGrafico').style.display = 'block';
+            } else if (senha === 'ProBI2024!@#') {
+                alert('Acesso Pro detectado! Redirecionando para o Dashboard Pro...');
+                setTimeout(() => {
+                    window.location.href = '/bi-pro';
+                }, 2000);
+            } else {
+                alert('Senha incorreta.');
+            }
+        }
+
+        // Função para selecionar tipo de gráfico
+        function selecionarTipoGrafico(tipo) {
+            const eixoY = document.getElementById('eixoY').value.trim();
+            const { tipo: tipoAnalise } = obterPeriodos(mapaOpcoes[document.getElementById('tipoAnalise').value]);
+
+            gerarGrafico(periodosAtuais, valoresAtuais, eixoY, tipoAnalise, tipo);
+            fecharModalTipo();
+        }
+
+        // Função para exportar PNG
+        function exportarPNG() {
+            if (!graficoAtual) {
+                alert('Nenhum gráfico foi gerado ainda.');
+                return;
+            }
+
+            try {
+                // Criar um canvas temporário com fundo branco
+                const canvas = document.getElementById('grafico');
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                
+                // Preencher com fundo branco
+                tempCtx.fillStyle = 'white';
+                tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                
+                // Desenhar o gráfico por cima
+                tempCtx.drawImage(canvas, 0, 0);
+                
+                // Criar link de download
+                const link = document.createElement('a');
+                link.download = `grafico_${new Date().getTime()}.png`;
+                link.href = tempCanvas.toDataURL('image/png');
+                
+                // Simular clique para download
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                alert('Gráfico exportado como PNG com sucesso!');
+            } catch (error) {
+                console.error('Erro ao exportar PNG:', error);
+                alert('Erro ao exportar PNG. Tente novamente.');
+            }
+        }
+
+        // Função para adicionar dado
+        function adicionarDado() {
+            const novoValor = document.getElementById('novoValor').value;
+            const novoPeriodo = document.getElementById('novoPeriodo').value;
+
+            try {
+                const valorFloat = parseFloat(novoValor);
+                if (isNaN(valorFloat)) {
+                    alert('Digite um valor numérico válido.');
+                    return;
+                }
+
+                valoresAtuais.unshift(valorFloat);
+                periodosAtuais.unshift(novoPeriodo);
+
+                alert(`Dado adicionado: ${novoPeriodo} = ${valorFloat}`);
+
+                // Limpar campos
+                document.getElementById('novoValor').value = '';
+                document.getElementById('novoPeriodo').value = '';
+
+                // Atualizar estatísticas
+                atualizarEstatisticas(valoresAtuais);
+            } catch (error) {
+                alert('Erro ao adicionar dado.');
+            }
+        }
+
+        // Função para mostrar média
+        function mostrarMedia() {
+            if (valoresAtuais.length === 0) {
+                alert('Nenhum dado carregado.');
+                return;
+            }
+
+            const media = valoresAtuais.reduce((a, b) => a + b, 0) / valoresAtuais.length;
+            alert(`A média dos valores inseridos é: ${media.toFixed(2)}`);
+        }
+
+        // Função para exportar para Excel
+        function exportarExcel() {
+            if (valoresAtuais.length === 0 || periodosAtuais.length === 0) {
+                alert('Nenhum dado carregado para exportar.');
+                return;
+            }
+
+            // Verificar se tem acesso ao Excel (Premium ou Pro)
+            if (nivelAcesso === 'basico') {
+                alert('Exportação Excel disponível apenas nos planos Premium e Pro.');
+                return;
+            }
+
+            const eixoY = document.getElementById('eixoY').value.trim() || 'Valor';
+
+            const dados = periodosAtuais.map((periodo, index) => ({
+                'Período': periodo,
+                [eixoY]: valoresAtuais[index]
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(dados);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Dados');
+
+            XLSX.writeFile(wb, 'analise_dados.xlsx');
+            alert('Arquivo Excel exportado com sucesso!');
+        }
+
+        // Função para download do executável
+        function downloadExecutable() {
+            // Criar um link para download do arquivo Python
+            const link = document.createElement('a');
+            link.href = 'https://blobs.vusercontent.net/blob/NovoGrafico-W9I68lC11miWAKWCQ2CiK5RhzkWtRB.py';
+            link.download = 'AnalisadorGrafico.py';
+            link.click();
+
+            alert('Download iniciado! Execute o arquivo Python para usar a versão desktop.');
+        }
+
+        // Funções para modais
+        function fecharModal() {
+            document.getElementById('modalSenha').style.display = 'none';
+            document.getElementById('senha').value = '';
+        }
+
+        function fecharModalTipo() {
+            document.getElementById('modalTipoGrafico').style.display = 'none';
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Fechar modal ao clicar fora
+            window.onclick = (event) => {
+                const modalSenha = document.getElementById('modalSenha');
+                const modalTipo = document.getElementById('modalTipoGrafico');
+
+                if (event.target === modalSenha) {
+                    fecharModal();
+                }
+                if (event.target === modalTipo) {
+                    fecharModalTipo();
+                }
+            };
+
+            // Enter para verificar senha
+            document.getElementById('senha').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    verificarSenha();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

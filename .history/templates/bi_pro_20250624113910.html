@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Dashboard BI Pro</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #e74c3c;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .senhas-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .senhas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .senha-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .senha-card.basico { border-color: #28a745; }
+        .senha-card.premium { border-color: #ffc107; }
+        .senha-card.pro { border-color: #dc3545; }
+
+        .senha-plano {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .senha-codigo {
+            font-family: 'Courier New', monospace;
+            background: #343a40;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 1rem;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .senha-codigo:hover {
+            background: #495057;
+            transform: scale(1.02);
+        }
+
+        .table-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-confirmado {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pendente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.7);
+            border: none;
+            cursor: pointer;
+            border-radius: 10px 10px 0 0;
+            margin-right: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: rgba(255, 255, 255, 0.95);
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-shield-alt"></i> Painel Administrativo - Dashboard BI Pro</h1>
+            <div style="margin-top: 15px;">
+                <a href="{{ url_for('index') }}" class="btn btn-info">🏠 Voltar ao Site</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">🚪 Logout</a>
+            </div>
+        </div>
+
+        <!-- Estatísticas -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.total_clientes }}</div>
+                <div class="stat-label">Total de Clientes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.total_pagamentos }}</div>
+                <div class="stat-label">Total de Pagamentos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.pagamentos_confirmados }}</div>
+                <div class="stat-label">Pagamentos Confirmados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">R$ {{ "%.2f"|format(stats.receita_total) }}</div>
+                <div class="stat-label">Receita Total</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.acessos_hoje }}</div>
+                <div class="stat-label">Acessos Hoje</div>
+            </div>
+        </div>
+
+        <!-- Senhas de Acesso Atualizadas -->
+        <div class="senhas-section">
+            <h2><i class="fas fa-key"></i> Senhas de Acesso Atualizadas</h2>
+            <p style="color: #6c757d; margin-bottom: 20px;">Senhas sincronizadas com o frontend</p>
+            
+            <div class="senhas-grid">
+                {% for plano, senha in senhas_acesso.items() %}
+                <div class="senha-card {{ plano }}">
+                    <div class="senha-plano">{{ plano.title() }}</div>
+                    <div class="senha-codigo" onclick="copiarSenha('{{ senha }}')" title="Clique para copiar">
+                        {{ senha }}
+                    </div>
+                    <small>Clique para copiar</small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Abas -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('pagamentos')">💳 Pagamentos</button>
+            <button class="tab" onclick="switchTab('clientes')">👥 Clientes</button>
+            <button class="tab" onclick="switchTab('logs')">📊 Logs de Acesso</button>
+        </div>
+
+        <!-- Aba Pagamentos -->
+        <div id="pagamentos-tab" class="tab-content active">
+            <div class="table-section">
+                <h2><i class="fas fa-credit-card"></i> Pagamentos Recentes</h2>
+                
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Email</th>
+                            <th>Plano</th>
+                            <th>Valor</th>
+                            <th>Método</th>
+                            <th>Status</th>
+                            <th>Código</th>
+                            <th>Data</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pagamento in pagamentos %}
+                        <tr>
+                            <td>{{ pagamento.id }}</td>
+                            <td>{{ pagamento.email }}</td>
+                            <td>{{ pagamento.plano.title() }}</td>
+                            <td>R$ {{ "%.2f"|format(pagamento.valor) }}</td>
+                            <td>{{ pagamento.metodo.upper() }}</td>
+                            <td>
+                                <span class="status-badge status-{{ pagamento.status }}">
+                                    {{ pagamento.status.title() }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if pagamento.codigo_acesso %}
+                                    <code>{{ pagamento.codigo_acesso }}</code>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>{{ pagamento.data_criacao.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>
+                                {% if pagamento.status == 'pendente' %}
+                                    <a href="{{ url_for('confirmar_pagamento_admin', pagamento_id=pagamento.id) }}" 
+                                       class="btn btn-success">✅ Confirmar</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Aba Clientes -->
+        <div id="clientes-tab" class="tab-content">
+            <div class="table-section">
+                <h2><i class="fas fa-users"></i> Clientes Cadastrados</h2>
+                
+                <form method="POST" style="margin-bottom: 20px;">
+                    <div style="display: flex; gap: 10px; align-items: end;">
+                        <div>
+                            <label>Nome:</label>
+                            <input type="text" name="nome" required style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                        <div>
+                            <label>Email:</label>
+                            <input type="email" name="email" required style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                        <button type="submit" class="btn btn-success">➕ Adicionar Cliente</button>
+                    </div>
+                </form>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cliente in clientes %}
+                        <tr>
+                            <td>{{ cliente.id }}</td>
+                            <td>{{ cliente.nome }}</td>
+                            <td>{{ cliente.email }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Aba Logs -->
+        <div id="logs-tab" class="tab-content">
+            <div class="table-section">
+                <h2><i class="fas fa-chart-line"></i> Logs de Acesso Recentes</h2>
+                
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Senha Usada</th>
+                            <th>Plano</th>
+                            <th>IP</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs_acesso %}
+                        <tr>
+                            <td>{{ log.data_acesso.strftime('%d/%m/%Y %H:%M:%S') }}</td>
+                            <td><code>{{ log.senha_usada }}</code></td>
+                            <td>{{ log.plano_acessado.title() }}</td>
+                            <td>{{ log.ip_usuario or 'N/A' }}</td>
+                            <td>
+                                <span class="status-badge {% if log.sucesso %}status-confirmado{% else %}status-pendente{% endif %}">
+                                    {% if log.sucesso %}✅ Sucesso{% else %}❌ Falha{% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Remover classe active de todas as abas
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Adicionar classe active na aba clicada
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+
+        function copiarSenha(senha) {
+            navigator.clipboard.writeText(senha).then(() => {
+                // Feedback visual
+                const elemento = event.target;
+                const textoOriginal = elemento.textContent;
+                elemento.textContent = '✓ Copiado!';
+                elemento.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    elemento.textContent = textoOriginal;
+                    elemento.style.background = '#343a40';
+                }, 1500);
+            }).catch(() => {
+                alert('Senha copiada: ' + senha);
+            });
+        }
+
+        // Auto-refresh da página a cada 30 segundos para logs em tempo real
+        setInterval(() => {
+            if (document.getElementById('logs-tab').classList.contains('active')) {
+                location.reload();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

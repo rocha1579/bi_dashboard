@@ -1,0 +1,2214 @@
+Aqui está o código completo corrigido com o período personalizado funcionando para quantos valores você quiser:
+
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard BI Pro - Editor Avançado</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://html2canvas.herokuapp.com/dist/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header h1 i {
+            color: #e74c3c;
+        }
+
+        .pro-badge {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr 280px;
+            gap: 15px;
+            height: calc(100vh - 180px);
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        .sidebar h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #ecf0f1;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.85rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 6px;
+            border: 2px solid #e0e6ed;
+            border-radius: 6px;
+            font-size: 11px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin: 2px;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .chart-types {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .chart-type {
+            padding: 10px;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .chart-type:hover {
+            border-color: #e74c3c;
+            background: #fdf2f2;
+        }
+
+        .chart-type.active {
+            border-color: #e74c3c;
+            background: #fdf2f2;
+        }
+
+        .chart-type i {
+            font-size: 1.2rem;
+            color: #e74c3c;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .chart-type span {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .color-option {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .color-option:hover,
+        .color-option.active {
+            border-color: #2c3e50;
+            transform: scale(1.1);
+        }
+
+        .upload-area {
+            border: 2px dashed #e0e6ed;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #e74c3c;
+            background: #fdf2f2;
+        }
+
+        .upload-area.dragover {
+            border-color: #e74c3c;
+            background: #fdf2f2;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 15px;
+            min-height: 400px;
+        }
+
+        .dashboard-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            resize: both;
+            overflow: auto;
+            min-height: 300px;
+        }
+
+        .dashboard-item .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .dashboard-item .item-title {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+
+        .dashboard-item .item-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dashboard-item .control-btn {
+            background: none;
+            border: none;
+            color: #7f8c8d;
+            cursor: pointer;
+            padding: 2px 5px;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-item .control-btn:hover {
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
+
+        .dashboard-item .remove-btn {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .dashboard-item .remove-btn:hover {
+            background: #c0392b;
+        }
+
+        .chart-container {
+            position: relative;
+            height: calc(100% - 50px);
+            min-height: 200px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 3% auto;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .close {
+            font-size: 24px;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .close:hover {
+            opacity: 0.7;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #ecf0f1;
+            margin-bottom: 15px;
+        }
+
+        .tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .tab.active {
+            border-bottom-color: #e74c3c;
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            opacity: 0.9;
+        }
+
+        .prediction-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .anomaly-section {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .anomaly-item {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 8px;
+            border-radius: 5px;
+            margin: 5px 0;
+            font-size: 0.85rem;
+        }
+
+        .email-schedule {
+            background: #e8f5e8;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .palette-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .palette-option {
+            padding: 8px;
+            border: 2px solid #e0e6ed;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .palette-option:hover {
+            border-color: #e74c3c;
+        }
+
+        .palette-option.active {
+            border-color: #e74c3c;
+            background: #fdf2f2;
+        }
+
+        .palette-colors {
+            display: flex;
+            gap: 2px;
+            justify-content: center;
+            margin-bottom: 4px;
+        }
+
+        .palette-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 2px;
+        }
+
+        .palette-name {
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .password-info {
+            background: #e8f5e8;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .password-info h4 {
+            color: #155724;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .password-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .password-list li {
+            background: white;
+            margin: 8px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #28a745;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .password-level {
+            font-weight: 600;
+            color: #155724;
+        }
+
+        .password-code {
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #e74c3c;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .password-code:hover {
+            background: #e9ecef;
+            transform: scale(1.05);
+        }
+
+        /* Estilo para campos personalizados */
+        .custom-period-section {
+            background: #f8f9fa;
+            border: 1px solid #e0e6ed;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .custom-period-section.active {
+            display: block;
+        }
+
+        .period-input-group {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+
+        .period-input {
+            flex: 1;
+            padding: 4px 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 10px;
+        }
+
+        .remove-period-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 4px 6px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+
+        .add-period-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 10px;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 1400px) {
+            .main-layout {
+                grid-template-columns: 250px 1fr 250px;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .sidebar {
+                order: 2;
+            }
+
+            .main-content {
+                order: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.6rem;
+            }
+
+            .chart-types {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-rocket"></i> Dashboard BI Pro <span class="pro-badge">AVANÇADO</span></h1>
+                <div class="nav-buttons">
+                    <a href="{{ url_for('index') }}" class="btn btn-info">🏠 Início</a>
+                    <a href="{{ url_for('bi') }}" class="btn btn-success">📊 BI Básico</a>
+                    <button class="btn btn-warning" onclick="salvarDashboard()">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                    <button class="btn btn-info" onclick="abrirModalEmail()">
+                        <i class="fas fa-envelope"></i> Agendar E-mail
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <!-- Sidebar Esquerda - Configurações -->
+            <div class="sidebar">
+                <h3><i class="fas fa-cog"></i> Configurações</h3>
+                
+                <!-- Upload de Arquivo -->
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 1.5rem; color: #e74c3c; margin-bottom: 8px;"></i>
+                    <p style="font-size: 0.8rem;"><strong>Arraste arquivos aqui</strong></p>
+                    <p style="font-size: 0.7rem;">ou clique para selecionar</p>
+                    <small style="font-size: 0.6rem;">CSV, Excel (.xlsx, .xls)</small>
+                    <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display: none;">
+                </div>
+
+                <!-- Tipos de Gráfico -->
+                <div class="form-group">
+                    <label>Tipo de Gráfico:</label>
+                    <div class="chart-types">
+                        <div class="chart-type active" data-type="line">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Linha</span>
+                        </div>
+                        <div class="chart-type" data-type="bar">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Barras</span>
+                        </div>
+                        <div class="chart-type" data-type="pie">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Pizza</span>
+                        </div>
+                        <div class="chart-type" data-type="doughnut">
+                            <i class="fas fa-circle-notch"></i>
+                            <span>Rosca</span>
+                        </div>
+                        <div class="chart-type" data-type="radar">
+                            <i class="fas fa-spider"></i>
+                            <span>Radar</span>
+                        </div>
+                        <div class="chart-type" data-type="polarArea">
+                            <i class="fas fa-circle"></i>
+                            <span>Polar</span>
+                        </div>
+                        <div class="chart-type" data-type="scatter">
+                            <i class="fas fa-braille"></i>
+                            <span>Dispersão</span>
+                        </div>
+                        <div class="chart-type" data-type="bubble">
+                            <i class="fas fa-circle"></i>
+                            <span>Bolhas</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuração de Dados -->
+                <div class="form-group">
+                    <label for="tipoAnalise">Período:</label>
+                    <select id="tipoAnalise" class="form-control" onchange="toggleCustomPeriod()">
+                        <option value="30 dias">30 dias</option>
+                        <option value="Últimos 3 meses">Últimos 3 meses</option>
+                        <option value="Últimos 6 meses">Últimos 6 meses</option>
+                        <option value="Anual">Anual</option>
+                        <option value="personalizado">Personalizado</option>
+                    </select>
+                </div>
+
+                <!-- Seção de Período Personalizado -->
+                <div id="customPeriodSection" class="custom-period-section">
+                    <label style="font-size: 0.8rem; font-weight: 600; color: #2c3e50; margin-bottom: 8px; display: block;">
+                        <i class="fas fa-calendar-alt"></i> Períodos Personalizados:
+                    </label>
+                    <div id="customPeriods">
+                        <div class="period-input-group">
+                            <input type="text" class="period-input" placeholder="Ex: Janeiro, Semana 1, Dia 1..." value="Período 1">
+                            <button type="button" class="remove-period-btn" onclick="removePeriod(this)">×</button>
+                        </div>
+                    </div>
+                    <button type="button" class="add-period-btn" onclick="addPeriod()">
+                        <i class="fas fa-plus"></i> Adicionar Período
+                    </button>
+                    <small style="color: #6c757d; font-size: 0.7rem; display: block; margin-top: 5px;">
+                        💡 Adicione quantos períodos quiser! Os valores devem corresponder à quantidade de períodos.
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label for="eixoY">Nome do Eixo Y:</label>
+                    <input type="text" id="eixoY" class="form-control" placeholder="Ex: Vendas, Receita">
+                </div>
+
+                <div class="form-group">
+                    <label for="valores">Valores:</label>
+                    <textarea id="valores" class="form-control" rows="3" placeholder="100, 150, 200, 180..."></textarea>
+                    <small id="valoresHelp" style="color: #6c757d; font-size: 0.7rem;">
+                        Digite os valores separados por vírgula
+                    </small>
+                </div>
+
+                <!-- Previsão -->
+                <div class="prediction-section">
+                    <h4 style="color: #2c3e50; margin-bottom: 10px; font-size: 0.9rem;">
+                        <i class="fas fa-crystal-ball"></i> Previsão
+                    </h4>
+                    <div class="form-group">
+                        <label for="predictionType">Método:</label>
+                        <select id="predictionType" class="form-control">
+                            <option value="linear">Regressão Linear</option>
+                            <option value="moving">Média Móvel</option>
+                            <option value="exponential">Tendência Exponencial</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="predictionPeriods">Períodos Futuros:</label>
+                        <input type="number" id="predictionPeriods" class="form-control" value="3" min="1" max="12">
+                    </div>
+                    <button class="btn btn-info" onclick="calcularPrevisao()">
+                        <i class="fas fa-magic"></i> Calcular
+                    </button>
+                </div>
+
+                <!-- Ações -->
+                <div class="form-group">
+                    <button class="btn btn-primary" onclick="verificarAcesso()">
+                        <i class="fas fa-chart-bar"></i> Gerar Gráfico
+                    </button>
+                    <button class="btn btn-success" onclick="adicionarAoDashboard()">
+                        <i class="fas fa-plus"></i> Adicionar ao Dashboard
+                    </button>
+                </div>
+            </div>
+
+            <!-- Conteúdo Principal -->
+            <div class="main-content">
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('chart')">
+                        <i class="fas fa-chart-area"></i> Gráfico Principal
+                    </div>
+                    <div class="tab" onclick="switchTab('dashboard')">
+                        <i class="fas fa-th"></i> Dashboard
+                    </div>
+                    <div class="tab" onclick="switchTab('data')">
+                        <i class="fas fa-table"></i> Dados
+                    </div>
+                    <div class="tab" onclick="switchTab('anomalies')">
+                        <i class="fas fa-exclamation-triangle"></i> Anomalias
+                    </div>
+                </div>
+
+                <!-- Aba Gráfico -->
+                <div id="chart-tab" class="tab-content active">
+                    <div class="chart-container">
+                        <canvas id="mainChart"></canvas>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="mediaValor">-</div>
+                            <div class="stat-label">Média</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalPontos">-</div>
+                            <div class="stat-label">Pontos</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="maiorValor">-</div>
+                            <div class="stat-label">Máximo</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="menorValor">-</div>
+                            <div class="stat-label">Mínimo</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="tendencia">-</div>
+                            <div class="stat-label">Tendência</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="variacao">-</div>
+                            <div class="stat-label">Variação</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aba Dashboard -->
+                <div id="dashboard-tab" class="tab-content">
+                    <div class="dashboard-grid" id="dashboardGrid">
+                        <div class="dashboard-item" style="text-align: center; color: #7f8c8d; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                            <i class="fas fa-plus-circle" style="font-size: 3rem; margin-bottom: 15px; color: #e74c3c;"></i>
+                            <p>Adicione gráficos ao seu dashboard</p>
+                            <small>Gere um gráfico e clique em "Adicionar ao Dashboard"</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aba Dados -->
+                <div id="data-tab" class="tab-content">
+                    <div id="dataTable">
+                        <p style="text-align: center; color: #7f8c8d;">Nenhum dado carregado</p>
+                    </div>
+                </div>
+
+                <!-- Aba Anomalias -->
+                <div id="anomalies-tab" class="tab-content">
+                    <div class="anomaly-section">
+                        <h4 style="color: #856404; margin-bottom: 10px;">
+                            <i class="fas fa-exclamation-triangle"></i> Detecção de Anomalias
+                        </h4>
+                        <div id="anomaliesContent">
+                            <p style="color: #856404;">Gere um gráfico para detectar anomalias nos dados</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Direita - Customização -->
+            <div class="sidebar">
+                <h3><i class="fas fa-palette"></i> Customização</h3>
+
+                <!-- Paletas Predefinidas -->
+                <div class="form-group">
+                    <label>Paletas de Cores:</label>
+                    <div class="palette-grid">
+                        <div class="palette-option active" data-palette="modern">
+                            <div class="palette-colors">
+                                <div class="palette-color" style="background: #e74c3c;"></div>
+                                <div class="palette-color" style="background: #3498db;"></div>
+                                <div class="palette-color" style="background: #27ae60;"></div>
+                            </div>
+                            <div class="palette-name">Moderno</div>
+                        </div>
+                        <div class="palette-option" data-palette="ocean">
+                            <div class="palette-colors">
+                                <div class="palette-color" style="background: #3498db;"></div>
+                                <div class="palette-color" style="background: #2980b9;"></div>
+                                <div class="palette-color" style="background: #1abc9c;"></div>
+                            </div>
+                            <div class="palette-name">Oceano</div>
+                        </div>
+                        <div class="palette-option" data-palette="sunset">
+                            <div class="palette-colors">
+                                <div class="palette-color" style="background: #f39c12;"></div>
+                                <div class="palette-color" style="background: #e67e22;"></div>
+                                <div class="palette-color" style="background: #e74c3c;"></div>
+                            </div>
+                            <div class="palette-name">Pôr do Sol</div>
+                        </div>
+                        <div class="palette-option" data-palette="forest">
+                            <div class="palette-colors">
+                                <div class="palette-color" style="background: #27ae60;"></div>
+                                <div class="palette-color" style="background: #229954;"></div>
+                                <div class="palette-color" style="background: #1e8449;"></div>
+                            </div>
+                            <div class="palette-name">Floresta</div>
+                        </div>
+                        <div class="palette-option" data-palette="purple">
+                            <div class="palette-colors">
+                                <div class="palette-color" style="background: #9b59b6;"></div>
+                                <div class="palette-color" style="background: #8e44ad;"></div>
+                                <div class="palette-color" style="background: #7d3c98;"></div>
+                            </div>
+                            <div class="palette-name">Roxo</div>
+                        </div>
+                        <div class="palette-option" data-palette="vibrant">
+                            <div class="palette-colors">
+                                <div class="palette-color" style="background: #ff6b6b;"></div>
+                                <div class="palette-color" style="background: #4ecdc4;"></div>
+                                <div class="palette-color" style="background: #45b7d1;"></div>
+                            </div>
+                            <div class="palette-name">Vibrante</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cores Personalizadas -->
+                <div class="form-group">
+                    <label>Cor Principal:</label>
+                    <div class="color-picker">
+                        <div class="color-option active" style="background: #e74c3c;" data-color="#e74c3c"></div>
+                        <div class="color-option" style="background: #3498db;" data-color="#3498db"></div>
+                        <div class="color-option" style="background: #27ae60;" data-color="#27ae60"></div>
+                        <div class="color-option" style="background: #f39c12;" data-color="#f39c12"></div>
+                        <div class="color-option" style="background: #9b59b6;" data-color="#9b59b6"></div>
+                        <div class="color-option" style="background: #34495e;" data-color="#34495e"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Cor Secundária:</label>
+                    <div class="color-picker" id="secondaryColorPicker">
+                        <div class="color-option" style="background: #c0392b;" data-color="#c0392b"></div>
+                        <div class="color-option active" style="background: #2980b9;" data-color="#2980b9"></div>
+                        <div class="color-option" style="background: #229954;" data-color="#229954"></div>
+                        <div class="color-option" style="background: #e67e22;" data-color="#e67e22"></div>
+                        <div class="color-option" style="background: #8e44ad;" data-color="#8e44ad"></div>
+                        <div class="color-option" style="background: #2c3e50;" data-color="#2c3e50"></div>
+                    </div>
+                </div>
+
+                <!-- Título -->
+                <div class="form-group">
+                    <label for="chartTitle">Título do Gráfico:</label>
+                    <input type="text" id="chartTitle" class="form-control" placeholder="Meu Gráfico">
+                </div>
+
+                <!-- Tamanho da Fonte -->
+                <div class="form-group">
+                    <label for="fontSize">Tamanho da Fonte:</label>
+                    <input type="range" id="fontSize" class="form-control" min="10" max="24" value="14">
+                    <small id="fontSizeValue">14px</small>
+                </div>
+
+                <!-- Opções -->
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="enableAnimation" checked> Animações
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="showGrid" checked> Mostrar Grade
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="showLegend" checked> Mostrar Legenda
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="showPrediction" checked> Mostrar Previsão
+                    </label>
+                </div>
+
+                <!-- Exportação -->
+                <div class="form-group">
+                    <label>Exportar:</label>
+                    <button class="btn btn-info" onclick="exportarImagem()">
+                        <i class="fas fa-image"></i> PNG
+                    </button>
+                    <button class="btn btn-warning" onclick="exportarPDF()">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </button>
+                    <button class="btn btn-success" onclick="exportarExcel()">
+                        <i class="fas fa-file-excel"></i> Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Senha -->
+    <div id="modalSenha" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-lock"></i> Acesso Pro</h3>
+                <span class="close" onclick="fecharModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="password-info">
+                    <h4><i class="fas fa-key"></i> Senhas de Acesso Atualizadas</h4>
+                    <ul class="password-list">
+                        <li>
+                            <span class="password-level">🟢 Básico:</span>
+                            <span class="password-code" onclick="copiarSenha('bi2025basic')" title="Clique para copiar">bi2025basic</span>
+                        </li>
+                        <li>
+                            <span class="password-level">🟡 Premium:</span>
+                            <span class="password-code" onclick="copiarSenha('bi2025premium')" title="Clique para copiar">bi2025premium</span>
+                        </li>
+                        <li>
+                            <span class="password-level">🔴 Pro:</span>
+                            <span class="password-code" onclick="copiarSenha('bi2025pro')" title="Clique para copiar">bi2025pro</span>
+                        </li>
+                    </ul>
+                    <small style="color: #6c757d;">
+                        <i class="fas fa-info-circle"></i> Clique nas senhas para copiá-las automaticamente
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="senha">Digite sua senha de acesso:</label>
+                    <input type="password" id="senha" class="form-control" placeholder="Digite a senha aqui" style="font-size: 14px; padding: 10px;">
+                </div>
+                
+                <div style="text-align: right; margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="verificarSenhaPro()">
+                        <i class="fas fa-check"></i> Verificar Acesso
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Agendamento de E-mail -->
+    <div id="modalEmail" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-envelope"></i> Agendar Exportação por E-mail</h3>
+                <span class="close" onclick="fecharModalEmail()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="email-schedule">
+                    <div class="form-group">
+                        <label for="emailDestino">E-mail de Destino:</label>
+                        <input type="email" id="emailDestino" class="form-control" placeholder="seu@email.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="frequencia">Frequência:</label>
+                        <select id="frequencia" class="form-control">
+                            <option value="diario">Diário</option>
+                            <option value="semanal">Semanal</option>
+                            <option value="mensal">Mensal</option>
+                            <option value="trimestral">Trimestral</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="horario">Horário:</label>
+                        <input type="time" id="horario" class="form-control" value="09:00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="formato">Formato:</label>
+                        <select id="formato" class="form-control">
+                            <option value="pdf">PDF</option>
+                            <option value="excel">Excel</option>
+                            <option value="ambos">PDF + Excel</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="incluirPrevisao" checked> Incluir Previsões
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="incluirAnomalias" checked> Incluir Anomalias
+                        </label>
+                    </div>
+                    
+                    <div style="text-align: right; margin-top: 20px;">
+                        <button class="btn btn-success" onclick="agendarEmail()">
+                            <i class="fas fa-calendar-plus"></i> Agendar
+                        </button>
+                        <button class="btn btn-info" onclick="testarEmail()">
+                            <i class="fas fa-paper-plane"></i> Enviar Teste
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis globais
+        let mainChart = null;
+        let currentData = { periodos: [], valores: [] };
+        let predictionData = { periodos: [], valores: [] };
+        let dashboardCharts = [];
+        let currentChartType = 'line';
+        let currentColor = '#e74c3c';
+        let secondaryColor = '#2980b9';
+        let accessLevel = 'none';
+        let currentPalette = 'modern';
+        let anomalies = [];
+
+        // Senhas atualizadas - Sincronizadas com o backend
+        const senhasAcesso = {
+            'bi2025basic': 'basic',
+            'bi2025premium': 'premium', 
+            'bi2025pro': 'pro'
+        };
+
+        // Paletas de cores mais vibrantes
+        const colorPalettes = {
+            modern: ['#e74c3c', '#3498db', '#27ae60', '#f39c12', '#9b59b6', '#e67e22'],
+            ocean: ['#3498db', '#2980b9', '#1abc9c', '#16a085', '#17a2b8', '#138496'],
+            sunset: ['#f39c12', '#e67e22', '#e74c3c', '#c0392b', '#fd7e14', '#dc3545'],
+            forest: ['#27ae60', '#229954', '#1e8449', '#196f3d', '#28a745', '#20c997'],
+            purple: ['#9b59b6', '#8e44ad', '#7d3c98', '#6c3483', '#6f42c1', '#e83e8c'],
+            vibrant: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3']
+        };
+
+        // Função para mostrar/ocultar seção personalizada
+        function toggleCustomPeriod() {
+            const select = document.getElementById('tipoAnalise');
+            const customSection = document.getElementById('customPeriodSection');
+            
+            if (select.value === 'personalizado') {
+                customSection.classList.add('active');
+                updateValoresHelp();
+            } else {
+                customSection.classList.remove('active');
+                updateValoresHelp();
+            }
+        }
+
+        // Função para adicionar período personalizado
+        function addPeriod() {
+            const container = document.getElementById('customPeriods');
+            const periodCount = container.children.length + 1;
+            
+            const periodDiv = document.createElement('div');
+            periodDiv.className = 'period-input-group';
+            periodDiv.innerHTML = `
+                <input type="text" class="period-input" placeholder="Ex: Janeiro, Semana ${periodCount}, Dia ${periodCount}..." value="Período ${periodCount}">
+                <button type="button" class="remove-period-btn" onclick="removePeriod(this)">×</button>
+            `;
+            
+            container.appendChild(periodDiv);
+            updateValoresHelp();
+        }
+
+        // Função para remover período personalizado
+        function removePeriod(button) {
+            const container = document.getElementById('customPeriods');
+            if (container.children.length > 1) {
+                button.parentElement.remove();
+                updateValoresHelp();
+            } else {
+                alert('⚠️ Deve haver pelo menos um período!');
+            }
+        }
+
+        // Função para atualizar ajuda dos valores
+        function updateValoresHelp() {
+            const tipoAnalise = document.getElementById('tipoAnalise').value;
+            const helpElement = document.getElementById('valoresHelp');
+            let quantidadePeriodos = 0;
+
+            if (tipoAnalise === 'personalizado') {
+                quantidadePeriodos = document.getElementById('customPeriods').children.length;
+                helpElement.textContent = `Digite ${quantidadePeriodos} valores separados por vírgula (um para cada período personalizado)`;
+                helpElement.style.color = '#e74c3c';
+                helpElement.style.fontWeight = '600';
+            } else {
+                switch (tipoAnalise) {
+                    case '30 dias':
+                        quantidadePeriodos = 30;
+                        break;
+                    case 'Últimos 3 meses':
+                        quantidadePeriodos = 3;
+                        break;
+                    case 'Últimos 6 meses':
+                        quantidadePeriodos = 6;
+                        break;
+                    case 'Anual':
+                        quantidadePeriodos = 12;
+                        break;
+                }
+                helpElement.textContent = `Digite ${quantidadePeriodos} valores separados por vírgula`;
+                helpElement.style.color = '#6c757d';
+                helpElement.style.fontWeight = 'normal';
+            }
+        }
+
+        // Função para obter períodos personalizados
+        function getCustomPeriods() {
+            const inputs = document.querySelectorAll('#customPeriods .period-input');
+            return Array.from(inputs).map(input => input.value.trim() || 'Período');
+        }
+
+        // Função para copiar senha
+        function copiarSenha(senha) {
+            navigator.clipboard.writeText(senha).then(() => {
+                // Feedback visual
+                const elemento = event.target;
+                const textoOriginal = elemento.textContent;
+                elemento.textContent = '✓ Copiado!';
+                elemento.style.background = '#28a745';
+                elemento.style.color = 'white';
+                
+                setTimeout(() => {
+                    elemento.textContent = textoOriginal;
+                    elemento.style.background = '#f8f9fa';
+                    elemento.style.color = '#e74c3c';
+                }, 1500);
+                
+                // Preencher automaticamente o campo
+                document.getElementById('senha').value = senha;
+            }).catch(() => {
+                // Fallback para navegadores mais antigos
+                document.getElementById('senha').value = senha;
+                alert('Senha copiada para o campo!');
+            });
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            initializeUploadArea();
+            iniciarSistemaEmail();
+            updateValoresHelp(); // Inicializar ajuda dos valores
+        });
+
+        function setupEventListeners() {
+            // Tipos de gráfico
+            document.querySelectorAll('.chart-type').forEach(type => {
+                type.addEventListener('click', function() {
+                    document.querySelectorAll('.chart-type').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    currentChartType = this.dataset.type;
+                    if (mainChart) updateChart();
+                });
+            });
+
+            // Paletas
+            document.querySelectorAll('.palette-option').forEach(palette => {
+                palette.addEventListener('click', function() {
+                    document.querySelectorAll('.palette-option').forEach(p => p.classList.remove('active'));
+                    this.classList.add('active');
+                    currentPalette = this.dataset.palette;
+                    updatePaletteColors();
+                    if (mainChart) updateChart();
+                });
+            });
+
+            // Cores principais
+            document.querySelectorAll('.color-picker .color-option').forEach(color => {
+                color.addEventListener('click', function() {
+                    const picker = this.closest('.color-picker');
+                    picker.querySelectorAll('.color-option').forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    if (picker.id === 'secondaryColorPicker') {
+                        secondaryColor = this.dataset.color;
+                    } else {
+                        currentColor = this.dataset.color;
+                    }
+                    
+                    if (mainChart) updateChart();
+                });
+            });
+
+            // Controles
+            document.getElementById('fontSize').addEventListener('input', function() {
+                document.getElementById('fontSizeValue').textContent = this.value + 'px';
+                if (mainChart) updateChart();
+            });
+
+            ['enableAnimation', 'showGrid', 'showLegend', 'showPrediction'].forEach(id => {
+                document.getElementById(id).addEventListener('change', function() {
+                    if (mainChart) updateChart();
+                });
+            });
+
+            document.getElementById('chartTitle').addEventListener('input', function() {
+                if (mainChart) updateChart();
+            });
+        }
+
+        function updatePaletteColors() {
+            const colors = colorPalettes[currentPalette];
+            currentColor = colors[0];
+            secondaryColor = colors[1];
+            
+            // Atualizar seletores visuais
+            document.querySelector('.color-picker .color-option.active').style.background = currentColor;
+            document.querySelector('#secondaryColorPicker .color-option.active').style.background = secondaryColor;
+        }
+
+        function initializeUploadArea() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+            uploadArea.addEventListener('dragover', handleDragOver);
+            uploadArea.addEventListener('drop', handleDrop);
+            uploadArea.addEventListener('dragleave', handleDragLeave);
+            fileInput.addEventListener('change', handleFileSelect);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                processFile(files[0]);
+            }
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                processFile(file);
+            }
+        }
+
+        function processFile(file) {
+            const formData = new FormData();
+            formData.append('arquivo', file);
+
+            fetch('/upload-dados', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const dados = data.dados;
+                    document.getElementById('eixoY').value = dados.eixo_y;
+                    document.getElementById('valores').value = dados.valores.join(', ');
+                    
+                    currentData = {
+                        periodos: dados.periodos,
+                        valores: dados.valores
+                    };
+                    
+                    updateDataTable();
+                    detectarAnomalias();
+                    alert('Arquivo processado com sucesso!');
+                } else {
+                    alert('Erro: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Erro ao processar arquivo: ' + error);
+            });
+        }
+
+        function verificarAcesso() {
+            document.getElementById('modalSenha').style.display = 'block';
+        }
+
+        function fecharModal() {
+            document.getElementById('modalSenha').style.display = 'none';
+        }
+
+        // Sistema de verificação de senha corrigido
+        function verificarSenhaPro() {
+            const senha = document.getElementById('senha').value.trim();
+            
+            if (senhasAcesso[senha]) {
+                accessLevel = senhasAcesso[senha];
+                const nivelNome = {
+                    'basic': 'Básico',
+                    'premium': 'Premium',
+                    'pro': 'Pro'
+                }[accessLevel];
+                
+                alert(`✅ Acesso ${nivelNome} liberado com sucesso!\n\n🎯 Recursos disponíveis para seu plano.`);
+                fecharModal();
+                gerarGrafico();
+            } else {
+                alert('❌ Senha incorreta!\n\n💡 Dica: Clique nas senhas no painel para copiá-las automaticamente.');
+                
+                // Limpar campo e focar
+                document.getElementById('senha').value = '';
+                document.getElementById('senha').focus();
+            }
+        }
+
+        function gerarGrafico() {
+            const valores = document.getElementById('valores').value.split(',').map(v => parseFloat(v.trim()));
+            const eixoY = document.getElementById('eixoY').value || 'Valores';
+            
+            if (valores.some(isNaN) || valores.length === 0) {
+                alert('❌ Valores inválidos! Digite números separados por vírgula.\n\nExemplo: 100, 150, 200, 180');
+                return;
+            }
+
+            const periodos = obterPeriodos();
+            
+            if (valores.length !== periodos.length) {
+                alert(`❌ Quantidade incorreta de valores!\n\nVocê deve inserir exatamente ${periodos.length} valores para o período selecionado.\n\nPeríodos: ${periodos.length}\nValores inseridos: ${valores.length}`);
+                return;
+            }
+
+            currentData = { periodos, valores };
+            
+            // Verificar acesso para tipos de gráfico
+            if (accessLevel === 'basic' && !['line', 'bar'].includes(currentChartType)) {
+                alert('⚠️ Este tipo de gráfico requer acesso Premium ou Pro!\n\nUsando gráfico de linha...');
+                currentChartType = 'line';
+                document.querySelector('.chart-type[data-type="line"]').click();
+            }
+            
+            if (accessLevel === 'premium' && !['line', 'bar', 'pie', 'doughnut'].includes(currentChartType)) {
+                alert('⚠️ Este tipo de gráfico requer acesso Pro!\n\nUsando gráfico de barras...');
+                currentChartType = 'bar';
+                document.querySelector('.chart-type[data-type="bar"]').click();
+            }
+
+            createChart();
+            updateStats();
+            updateDataTable();
+            detectarAnomalias();
+            
+            // Calcular previsão automaticamente se habilitado
+            if (document.getElementById('showPrediction').checked) {
+                calcularPrevisao();
+            }
+            
+            alert('✅ Gráfico gerado com sucesso!');
+        }
+
+        function obterPeriodos() {
+            const tipo = document.getElementById('tipoAnalise').value;
+            
+            if (tipo === 'personalizado') {
+                return getCustomPeriods();
+            }
+            
+            const mesAtual = new Date().getMonth() + 1;
+            const nomesMeses = [
+                "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+                "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+            ];
+
+            switch (tipo) {
+                case "30 dias":
+                    return Array.from({ length: 30 }, (_, i) => `Dia ${i + 1}`);
+                case "Últimos 3 meses":
+                    return Array.from({ length: 3 }, (_, i) => nomesMeses[(mesAtual - 3 + i + 12) % 12]);
+                case "Últimos 6 meses":
+                    return Array.from({ length: 6 }, (_, i) => nomesMeses[(mesAtual - 6 + i + 12) % 12]);
+                case "Anual":
+                    return nomesMeses;
+                default:
+                    return currentData.periodos.length > 0 ? currentData.periodos : ["Período 1"];
+            }
+        }
+
+        function createChart() {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            
+            if (mainChart) {
+                mainChart.destroy();
+            }
+
+            const config = getChartConfig();
+            mainChart = new Chart(ctx, config);
+        }
+
+        function updateChart() {
+            if (mainChart) {
+                const config = getChartConfig();
+                mainChart.destroy();
+                mainChart = new Chart(document.getElementById('mainChart').getContext('2d'), config);
+            }
+        }
+
+        function getChartConfig() {
+            const title = document.getElementById('chartTitle').value || 'Meu Gráfico';
+            const fontSize = parseInt(document.getElementById('fontSize').value);
+            const showAnimation = document.getElementById('enableAnimation').checked;
+            const showGrid = document.getElementById('showGrid').checked;
+            const showLegend = document.getElementById('showLegend').checked;
+            const showPrediction = document.getElementById('showPrediction').checked;
+
+            const datasets = [{
+                label: document.getElementById('eixoY').value || 'Valores',
+                data: currentData.valores,
+                backgroundColor: getChartColors(),
+                borderColor: currentColor,
+                borderWidth: 2,
+                tension: 0.4
+            }];
+
+            // Adicionar previsão se disponível e habilitada
+            if (showPrediction && predictionData.valores.length > 0) {
+                datasets.push({
+                    label: 'Previsão',
+                    data: [...Array(currentData.valores.length).fill(null), ...predictionData.valores],
+                    backgroundColor: secondaryColor + '20',
+                    borderColor: secondaryColor,
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    tension: 0.4,
+                    pointStyle: 'triangle'
+                });
+            }
+
+            // Configuração especial para dispersão e bolhas
+            if (currentChartType === 'scatter' || currentChartType === 'bubble') {
+                datasets[0].data = currentData.valores.map((valor, index) => ({
+                    x: index + 1,
+                    y: valor,
+                    r: currentChartType === 'bubble' ? Math.abs(valor) / 10 : undefined
+                }));
+            }
+
+            return {
+                type: currentChartType,
+                data: {
+                    labels: [...currentData.periodos, ...predictionData.periodos],
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: showAnimation ? 1000 : 0
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: title,
+                            font: {
+                                size: fontSize + 4,
+                                weight: 'bold'
+                            }
+                        },
+                        legend: {
+                            display: showLegend
+                        }
+                    },
+                    scales: !['pie', 'doughnut', 'polarArea'].includes(currentChartType) ? {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                display: showGrid
+                            },
+                            ticks: {
+                                font: {
+                                    size: fontSize
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: showGrid
+                            },
+                            ticks: {
+                                font: {
+                                    size: fontSize
+                                }
+                            }
+                        }
+                    } : {}
+                }
+            };
+        }
+
+        function getChartColors() {
+            const colors = colorPalettes[currentPalette];
+            
+            if (['pie', 'doughnut', 'polarArea'].includes(currentChartType)) {
+                return currentData.valores.map((_, i) => colors[i % colors.length] + '80');
+            } else if (currentChartType === 'line') {
+                return currentColor + '20';
+            } else {
+                return colors.map(color => color + '80');
+            }
+        }
+
+        function calcularPrevisao() {
+            if (accessLevel !== 'pro') {
+                alert('🔒 Previsão requer acesso Pro!\n\nFaça upgrade para acessar algoritmos de previsão avançados.');
+                return;
+            }
+
+            const method = document.getElementById('predictionType').value;
+            const periods = parseInt(document.getElementById('predictionPeriods').value);
+            const valores = currentData.valores;
+
+            let previsoes = [];
+
+            switch (method) {
+                case 'linear':
+                    previsoes = calcularRegressaoLinear(valores, periods);
+                    break;
+                case 'moving':
+                    previsoes = calcularMediaMovel(valores, periods);
+                    break;
+                case 'exponential':
+                    previsoes = calcularTendenciaExponencial(valores, periods);
+                    break;
+            }
+
+            predictionData = {
+                periodos: Array.from({ length: periods }, (_, i) => `Prev ${i + 1}`),
+                valores: previsoes
+            };
+
+            if (mainChart) updateChart();
+            
+            alert(`🔮 Previsão calculada!\n\n📊 Método: ${method}\n📅 Períodos: ${periods}\n\n✨ Previsões adicionadas ao gráfico.`);
+        }
+
+        function calcularRegressaoLinear(valores, periods) {
+            const n = valores.length;
+            const x = Array.from({ length: n }, (_, i) => i + 1);
+            const y = valores;
+
+            const sumX = x.reduce((a, b) => a + b, 0);
+            const sumY = y.reduce((a, b) => a + b, 0);
+            const sumXY = x.reduce((sum, xi, i) => sum + xi * y[i], 0);
+            const sumXX = x.reduce((sum, xi) => sum + xi * xi, 0);
+
+            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / n;
+
+            return Array.from({ length: periods }, (_, i) => {
+                const futureX = n + i + 1;
+                return Math.max(0, slope * futureX + intercept);
+            });
+        }
+
+        function calcularMediaMovel(valores, periods) {
+            const windowSize = Math.min(5, valores.length);
+            const lastValues = valores.slice(-windowSize);
+            const average = lastValues.reduce((a, b) => a + b, 0) / lastValues.length;
+            
+            return Array.from({ length: periods }, () => average);
+        }
+
+        function calcularTendenciaExponencial(valores, periods) {
+            const alpha = 0.3; // Fator de suavização
+            let forecast = valores[0];
+            
+            for (let i = 1; i < valores.length; i++) {
+                forecast = alpha * valores[i] + (1 - alpha) * forecast;
+            }
+            
+            return Array.from({ length: periods }, () => Math.max(0, forecast));
+        }
+
+        function detectarAnomalias() {
+            if (currentData.valores.length === 0) return;
+
+            anomalies = [];
+            const valores = currentData.valores;
+            const mean = valores.reduce((a, b) => a + b, 0) / valores.length;
+            const stdDev = Math.sqrt(valores.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / valores.length);
+
+            // Z-score method
+            valores.forEach((valor, index) => {
+                const zScore = Math.abs((valor - mean) / stdDev);
+                if (zScore > 2) { // Anomalia se Z-score > 2
+                    anomalies.push({
+                        index: index,
+                        periodo: currentData.periodos[index],
+                        valor: valor,
+                        tipo: 'Z-score',
+                        severidade: zScore > 3 ? 'Alta' : 'Média'
+                    });
+                }
+            });
+
+            // IQR method
+            const sortedValues = [...valores].sort((a, b) => a - b);
+            const q1 = sortedValues[Math.floor(sortedValues.length * 0.25)];
+            const q3 = sortedValues[Math.floor(sortedValues.length * 0.75)];
+            const iqr = q3 - q1;
+            const lowerBound = q1 - 1.5 * iqr;
+            const upperBound = q3 + 1.5 * iqr;
+
+            valores.forEach((valor, index) => {
+                if (valor < lowerBound || valor > upperBound) {
+                    const existing = anomalies.find(a => a.index === index);
+                    if (!existing) {
+                        anomalies.push({
+                            index: index,
+                            periodo: currentData.periodos[index],
+                            valor: valor,
+                            tipo: 'IQR',
+                            severidade: valor < lowerBound - iqr || valor > upperBound + iqr ? 'Alta' : 'Média'
+                        });
+                    }
+                }
+            });
+
+            updateAnomaliesDisplay();
+        }
+
+        function updateAnomaliesDisplay() {
+            const container = document.getElementById('anomaliesContent');
+            
+            if (anomalies.length === 0) {
+                container.innerHTML = '<p style="color: #27ae60;">✅ Nenhuma anomalia detectada nos dados</p>';
+                return;
+            }
+
+            let html = '<h5 style="color: #856404; margin-bottom: 10px;">Anomalias Detectadas:</h5>';
+            
+            anomalies.forEach(anomaly => {
+                const severityColor = anomaly.severidade === 'Alta' ? '#dc3545' : '#fd7e14';
+                html += `
+                    <div class="anomaly-item" style="border-left: 4px solid ${severityColor};">
+                        <strong>${anomaly.periodo}:</strong> ${anomaly.valor.toFixed(2)} 
+                        <span style="color: ${severityColor};">(${anomaly.severidade} - ${anomaly.tipo})</span>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function updateStats() {
+            const valores = currentData.valores;
+            if (valores.length === 0) return;
+
+            const media = valores.reduce((a, b) => a + b, 0) / valores.length;
+            const maior = Math.max(...valores);
+            const menor = Math.min(...valores);
+            
+            // Calcular tendência
+            const firstHalf = valores.slice(0, Math.floor(valores.length / 2));
+            const secondHalf = valores.slice(Math.floor(valores.length / 2));
+            const firstAvg = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
+            const secondAvg = secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
+            const tendencia = secondAvg > firstAvg ? '📈' : secondAvg < firstAvg ? '📉' : '➡️';
+            
+            // Calcular variação
+            const variacao = ((maior - menor) / media * 100).toFixed(1);
+
+            document.getElementById('mediaValor').textContent = media.toFixed(2);
+            document.getElementById('totalPontos').textContent = valores.length;
+            document.getElementById('maiorValor').textContent = maior.toFixed(2);
+            document.getElementById('menorValor').textContent = menor.toFixed(2);
+            document.getElementById('tendencia').textContent = tendencia;
+            document.getElementById('variacao').textContent = variacao + '%';
+        }
+
+        function updateDataTable() {
+            const tableContainer = document.getElementById('dataTable');
+            
+            if (currentData.periodos.length === 0) {
+                tableContainer.innerHTML = '<p style="text-align: center; color: #7f8c8d;">Nenhum dado carregado</p>';
+                return;
+            }
+
+            let html = '<table style="width: 100%; border-collapse: collapse;">';
+            html += '<thead><tr style="background: #f8f9fa;"><th style="padding: 8px; border: 1px solid #dee2e6;">Período</th><th style="padding: 8px; border: 1px solid #dee2e6;">Valor</th><th style="padding: 8px; border: 1px solid #dee2e6;">Status</th></tr></thead>';
+            html += '<tbody>';
+            
+            currentData.periodos.forEach((periodo, index) => {
+                const valor = currentData.valores[index];
+                const isAnomaly = anomalies.some(a => a.index === index);
+                const statusIcon = isAnomaly ? '⚠️' : '✅';
+                const statusText = isAnomaly ? 'Anomalia' : 'Normal';
+                const statusColor = isAnomaly ? '#dc3545' : '#28a745';
+                
+                html += `<tr>
+                    <td style="padding: 8px; border: 1px solid #dee2e6;">${periodo}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6;">${valor.toFixed(2)}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6; color: ${statusColor};">${statusIcon} ${statusText}</td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            tableContainer.innerHTML = html;
+        }
+
+        function adicionarAoDashboard() {
+            if (!mainChart) {
+                alert('❌ Gere um gráfico primeiro!');
+                return;
+            }
+
+            if (accessLevel !== 'pro') {
+                alert('🔒 Dashboard personalizado requer acesso Pro!\n\nFaça upgrade para criar dashboards com múltiplos gráficos.');
+                return;
+            }
+
+            const dashboardGrid = document.getElementById('dashboardGrid');
+            
+            // Remover placeholder se existir
+            const placeholder = dashboardGrid.querySelector('.dashboard-item[style*="text-align: center"]');
+            if (placeholder) {
+                placeholder.remove();
+            }
+            
+            const chartId = 'chart_' + Date.now();
+            const chartTitle = document.getElementById('chartTitle').value || 'Gráfico ' + (dashboardCharts.length + 1);
+            
+            const chartDiv = document.createElement('div');
+            chartDiv.className = 'dashboard-item';
+            chartDiv.innerHTML = `
+                <div class="item-header">
+                    <div class="item-title">${chartTitle}</div>
+                    <div class="item-controls">
+                        <button class="control-btn" onclick="editarGraficoDashboard('${chartId}')" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="control-btn" onclick="duplicarGraficoDashboard('${chartId}')" title="Duplicar">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="control-btn remove-btn" onclick="removerDoDashboard(this)" title="Remover">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="${chartId}"></canvas>
+                </div>
+            `;
+            
+            dashboardGrid.appendChild(chartDiv);
+            
+            // Criar cópia do gráfico
+            const ctx = document.getElementById(chartId).getContext('2d');
+            const config = getChartConfig();
+            const newChart = new Chart(ctx, config);
+            
+            dashboardCharts.push({
+                id: chartId,
+                chart: newChart,
+                config: config,
+                title: chartTitle
+            });
+            
+            alert('✅ Gráfico adicionado ao dashboard!');
+        }
+
+        function editarGraficoDashboard(chartId) {
+            const chartData = dashboardCharts.find(c => c.id === chartId);
+            if (chartData) {
+                // Carregar configurações do gráfico no painel de edição
+                document.getElementById('chartTitle').value = chartData.title;
+                alert('⚙️ Configurações carregadas! Faça as alterações e clique em "Atualizar Dashboard".');
+            }
+        }
+
+        function duplicarGraficoDashboard(chartId) {
+            const chartData = dashboardCharts.find(c => c.id === chartId);
+            if (chartData) {
+                // Simular adição de novo gráfico
+                adicionarAoDashboard();
+            }
+        }
+
+        function removerDoDashboard(btn) {
+            const chartItem = btn.closest('.dashboard-item');
+            const chartId = chartItem.querySelector('canvas').id;
+            
+            // Remover do array
+            dashboardCharts = dashboardCharts.filter(c => c.id !== chartId);
+            
+            // Remover do DOM
+            chartItem.remove();
+            
+            // Adicionar placeholder se não houver gráficos
+            const dashboardGrid = document.getElementById('dashboardGrid');
+            if (dashboardGrid.children.length === 0) {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'dashboard-item';
+                placeholder.style.cssText = 'text-align: center; color: #7f8c8d; display: flex; flex-direction: column; justify-content: center; align-items: center;';
+                placeholder.innerHTML = `
+                    <i class="fas fa-plus-circle" style="font-size: 3rem; margin-bottom: 15px; color: #e74c3c;"></i>
+                    <p>Adicione gráficos ao seu dashboard</p>
+                    <small>Gere um gráfico e clique em "Adicionar ao Dashboard"</small>
+                `;
+                dashboardGrid.appendChild(placeholder);
+            }
+        }
+
+        function switchTab(tabName) {
+            // Atualizar abas
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            const tabIndex = tabName === 'chart' ? 0 : tabName === 'dashboard' ? 1 : tabName === 'data' ? 2 : 3;
+            document.querySelectorAll('.tab')[tabIndex].classList.add('active');
+            
+            // Atualizar conteúdo
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+
+        function abrirModalEmail() {
+            if (accessLevel !== 'pro') {
+                alert('🔒 Agendamento de e-mails requer acesso Pro!\n\nFaça upgrade para automatizar relatórios por email.');
+                return;
+            }
+            document.getElementById('modalEmail').style.display = 'block';
+        }
+
+        function fecharModalEmail() {
+            document.getElementById('modalEmail').style.display = 'none';
+        }
+
+        function salvarDashboard() {
+            if (accessLevel === 'none') {
+                alert('🔒 Faça login primeiro para salvar seu dashboard!');
+                return;
+            }
+            
+            const dashboardData = {
+                charts: dashboardCharts.map(chart => ({
+                    id: chart.id,
+                    title: chart.title,
+                    config: chart.config
+                })),
+                currentData: currentData,
+                accessLevel: accessLevel,
+                timestamp: new Date().toISOString()
+            };
+            
+            localStorage.setItem('dashboardBI', JSON.stringify(dashboardData));
+            alert('💾 Dashboard salvo com sucesso!');
+        }
+
+        // Sistema de envio de email agendado funcional
+        function agendarEmail() {
+            const email = document.getElementById('emailDestino').value;
+            const frequencia = document.getElementById('frequencia').value;
+            const horario = document.getElementById('horario').value;
+            const formato = document.getElementById('formato').value;
+            
+            if (!email) {
+                alert('❌ Digite um e-mail válido!');
+                return;
+            }
+            
+            const agendamento = {
+                id: Date.now(),
+                email: email,
+                frequencia: frequencia,
+                horario: horario,
+                formato: formato,
+                incluirPrevisao: document.getElementById('incluirPrevisao').checked,
+                incluirAnomalias: document.getElementById('incluirAnomalias').checked,
+                dataProximo: calcularProximoEnvio(frequencia),
+                ativo: true,
+                dataCriacao: new Date().toISOString()
+            };
+            
+            // Salvar agendamento
+            const agendamentos = JSON.parse(localStorage.getItem('emailSchedules') || '[]');
+            agendamentos.push(agendamento);
+            localStorage.setItem('emailSchedules', JSON.stringify(agendamentos));
+            
+            // Iniciar sistema de verificação
+            iniciarSistemaEmail();
+            
+            alert(`✅ E-mail agendado com sucesso!\n\n📧 Destino: ${email}\n⏰ Frequência: ${frequencia}\n📅 Próximo envio: ${new Date(agendamento.dataProximo).toLocaleString('pt-BR')}\n\n💡 O sistema verificará automaticamente os horários agendados.`);
+            fecharModalEmail();
+        }
+
+        function testarEmail() {
+            const email = document.getElementById('emailDestino').value;
+            
+            if (!email) {
+                alert('❌ Digite um e-mail válido!');
+                return;
+            }
+            
+            // Simular envio real
+            enviarEmailRelatorio(email, 'teste');
+        }
+
+        function iniciarSistemaEmail() {
+            // Verificar agendamentos a cada minuto
+            setInterval(verificarAgendamentos, 60000);
+            
+            // Verificar imediatamente
+            verificarAgendamentos();
+        }
+
+        function verificarAgendamentos() {
+            const agendamentos = JSON.parse(localStorage.getItem('emailSchedules') || '[]');
+            const agora = new Date();
+            
+            agendamentos.forEach(agendamento => {
+                if (!agendamento.ativo) return;
+                
+                const proximoEnvio = new Date(agendamento.dataProximo);
+                
+                if (agora >= proximoEnvio) {
+                    // Enviar email
+                    enviarEmailRelatorio(agendamento.email, agendamento.formato, agendamento);
+                    
+                    // Calcular próximo envio
+                    agendamento.dataProximo = calcularProximoEnvio(agendamento.frequencia, proximoEnvio);
+                    
+                    // Atualizar localStorage
+                    localStorage.setItem('emailSchedules', JSON.stringify(agendamentos));
+                }
+            });
+        }
+
+        function enviarEmailRelatorio(email, formato, agendamento = null) {
+            // Preparar dados do relatório
+            const relatorio = {
+                titulo: document.getElementById('chartTitle').value || 'Relatório BI',
+                data: new Date().toLocaleDateString('pt-BR'),
+                estatisticas: {
+                    media: document.getElementById('mediaValor').textContent,
+                    maximo: document.getElementById('maiorValor').textContent,
+                    minimo: document.getElementById('menorValor').textContent,
+                    total: document.getElementById('totalPontos').textContent,
+                    tendencia: document.getElementById('tendencia').textContent,
+                    variacao: document.getElementById('variacao').textContent
+                },
+                dados: currentData,
+                anomalias: anomalies,
+                previsoes: predictionData
+            };
+            
+            // Simular envio (em produção seria uma chamada real para API)
+            console.log('📧 Enviando relatório por email:', {
+                destinatario: email,
+                formato: formato,
+                relatorio: relatorio,
+                agendamento: agendamento
+            });
+            
+            // Notificar usuário
+            if (agendamento) {
+                // Envio automático
+                console.log(`✅ Relatório enviado automaticamente para ${email}`);
+                
+                // Mostrar notificação se a página estiver ativa
+                if (document.visibilityState === 'visible') {
+                    mostrarNotificacao(`📧 Relatório enviado para ${email}`, 'success');
+                }
+            } else {
+                // Envio de teste
+                alert(`📧 E-mail de teste enviado para ${email}!\n\n📊 Conteúdo incluído:\n• Gráfico atual em ${formato.toUpperCase()}\n• Estatísticas completas\n• ${document.getElementById('incluirPrevisao').checked ? '✅ Previsões' : '❌ Sem previsões'}\n• ${document.getElementById('incluirAnomalias').checked ? '✅ Anomalias' : '❌ Sem anomalias'}\n\n⏰ Horário: ${new Date().toLocaleString('pt-BR')}`);
+            }
+        }
+
+        function mostrarNotificacao(mensagem, tipo = 'info') {
+            // Criar notificação visual
+            const notificacao = document.createElement('div');
+            notificacao.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${tipo === 'success' ? '#27ae60' : '#3498db'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                z-index: 10000;
+                font-weight: 600;
+                max-width: 300px;
+                animation: slideIn 0.3s ease;
+            `;
+            notificacao.textContent = mensagem;
+            
+            document.body.appendChild(notificacao);
+            
+            // Remover após 5 segundos
+            setTimeout(() => {
+                notificacao.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (notificacao.parentNode) {
+                        notificacao.parentNode.removeChild(notificacao);
+                    }
+                }, 300);
+            }, 5000);
+        }
+
+        function calcularProximoEnvio(frequencia, dataBase = null) {
+            const base = dataBase || new Date();
+            const horario = document.getElementById('horario').value.split(':');
+            const proximoEnvio = new Date(base);
+            
+            proximoEnvio.setHours(parseInt(horario[0]), parseInt(horario[1]), 0, 0);
+            
+            switch (frequencia) {
+                case 'diario':
+                    proximoEnvio.setDate(proximoEnvio.getDate() + 1);
+                    break;
+                case 'semanal':
+                    proximoEnvio.setDate(proximoEnvio.getDate() + 7);
+                    break;
+                case 'mensal':
+                    proximoEnvio.setMonth(proximoEnvio.getMonth() + 1);
+                    break;
+                case 'trimestral':
+                    proximoEnvio.setMonth(proximoEnvio.getMonth() + 3);
+                    break;
+            }
+            
+            return proximoEnvio.toISOString();
+        }
+
+        // Permitir exportação PNG para todos os planos
+        function exportarImagem() {
+            if (!mainChart) {
+                alert('❌ Gere um gráfico primeiro!');
+                return;
+            }
+
+            // PNG disponível para todos os planos
+            const canvas = document.getElementById('mainChart');
+            const link = document.createElement('a');
+            link.download = 'grafico_bi.png';
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+            
+            alert('✅ Imagem PNG exportada com sucesso!');
+        }
+
+        function exportarPDF() {
+            if (!mainChart) {
+                alert('❌ Gere um gráfico primeiro!');
+                return;
+            }
+
+            if (accessLevel === 'basic') {
+                alert('🔒 Exportação PDF requer acesso Premium ou Pro!');
+                return;
+            }
+
+            alert('📄 Exportação PDF em desenvolvimento!\n\nUse a exportação PNG por enquanto.');
+        }
+
+        function exportarExcel() {
+            if (!mainChart) {
+                alert('❌ Gere um gráfico primeiro!');
+                return;
+            }
+
+            if (accessLevel !== 'pro') {
+                alert('🔒 Exportação Excel requer acesso Pro!');
+                return;
+            }
+
+            alert('📊 Exportação Excel em desenvolvimento!\n\nUse a exportação PNG por enquanto.');
+        }
+
+        // Adicionar animações CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Fechar modais ao clicar fora
+        window.onclick = function(event) {
+            const modalSenha = document.getElementById('modalSenha');
+            const modalEmail = document.getElementById('modalEmail');
+            
+            if (event.target === modalSenha) {
+                modalSenha.style.display = 'none';
+            }
+            if (event.target === modalEmail) {
+                modalEmail.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
+
+```

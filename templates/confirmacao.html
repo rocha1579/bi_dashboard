@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamento Confirmado</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: #27ae60;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            background: #d4edda;
+            color: #155724;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 1px solid #c3e6cb;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #3498db;
+        }
+
+        .next-steps {
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        .next-steps h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .next-steps ol {
+            color: #7f8c8d;
+            padding-left: 20px;
+        }
+
+        .next-steps li {
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            display: inline-block;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #229954);
+        }
+
+        .contact-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .contact-info h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .contact-info p {
+            color: #856404;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-icon">✅</div>
+        <h1>Pagamento Registrado!</h1>
+        
+        <div class="message">
+            <strong>Obrigado!</strong> Seu pagamento foi registrado com sucesso.
+        </div>
+
+        <div class="info-box">
+            <p><strong>📧 Email:</strong> {{ email }}</p>
+            <p><strong>📦 Plano:</strong> {{ plano.title() }}</p>
+            <p><strong>⏰ Status:</strong> Aguardando confirmação</p>
+        </div>
+
+        <div class="next-steps">
+            <h3>🚀 Próximos passos:</h3>
+            <ol>
+                <li><strong>Confirmação:</strong> Aguarde até 24h para confirmação do pagamento</li>
+                <li><strong>Email:</strong> Você receberá um email com sua senha de acesso</li>
+                <li><strong>Acesso:</strong> Use a senha no Dashboard BI para desbloquear os recursos</li>
+                <li><strong>Suporte:</strong> Entre em contato se precisar de ajuda</li>
+            </ol>
+        </div>
+
+        <div>
+            <a href="/bi" class="btn btn-success">📊 Ir para Dashboard BI</a>
+            <a href="/" class="btn">🏠 Voltar ao Início</a>
+        </div>
+
+        <div class="contact-info">
+            <h4>📞 Precisa de ajuda?</h4>
+            <p><strong>WhatsApp:</strong> (31) 99512-0154</p>
+            <p><strong>Email:</strong> gabrielalvessr@gmail.com</p>
+            <p>Resposta em até 24 horas</p>
+        </div>
+    </div>
+</body>
+</html>

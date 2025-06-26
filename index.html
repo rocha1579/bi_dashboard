@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard BI - Análise de Dados</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-chart-line"></i> Dashboard BI - Análise de Dados</h1>
+                <div class="header-actions">
+                    <button class="btn btn-download" onclick="downloadExecutable()">
+                        <i class="fas fa-download"></i> Baixar Executável
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="dashboard-grid">
+                <!-- Configuração da Análise -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-cog"></i> Configuração da Análise</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-group">
+                            <label for="tipoAnalise">Tipo de Análise:</label>
+                            <select id="tipoAnalise" class="form-control">
+                                <option value="30 dias">30 dias</option>
+                                <option value="Últimos 3 meses">Últimos 3 meses</option>
+                                <option value="Últimos 6 meses">Últimos 6 meses</option>
+                                <option value="Anual">Anual</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="eixoY">Nome do Eixo Y:</label>
+                            <input type="text" id="eixoY" class="form-control" placeholder="Ex: Vendas, Receita, etc.">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="valores">Valores (separados por vírgula):</label>
+                            <textarea id="valores" class="form-control" rows="4" placeholder="Ex: 100, 150, 200, 180, 220..."></textarea>
+                            <small class="help-text">Digite os valores separados por vírgula</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Adicionar Novos Dados -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-plus"></i> Adicionar Dados</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="novoValor">Novo Valor:</label>
+                                <input type="number" id="novoValor" class="form-control" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="novoPeriodo">Período:</label>
+                                <input type="text" id="novoPeriodo" class="form-control" placeholder="Ex: Janeiro, Dia 1">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="adicionarDado()">
+                            <i class="fas fa-plus"></i> Adicionar Dado
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Ações -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-tools"></i> Ações</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="action-buttons">
+                            <button class="btn btn-success" onclick="gerarAnalise()">
+                                <i class="fas fa-chart-bar"></i> Gerar Análise
+                            </button>
+                            <button class="btn btn-info" onclick="mostrarMedia()">
+                                <i class="fas fa-calculator"></i> Mostrar Média
+                            </button>
+                            <button class="btn btn-warning" onclick="exportarExcel()">
+                                <i class="fas fa-file-excel"></i> Exportar Excel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estatísticas -->
+                <div class="card stats-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-pie"></i> Estatísticas</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-value" id="mediaValor">-</div>
+                                <div class="stat-label">Média</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="totalPontos">-</div>
+                                <div class="stat-label">Total de Pontos</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="maiorValor">-</div>
+                                <div class="stat-label">Maior Valor</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="menorValor">-</div>
+                                <div class="stat-label">Menor Valor</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico -->
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-area"></i> Visualização</h2>
+                        <div class="chart-controls">
+                            <select id="tipoGrafico" class="form-control-sm">
+                                <option value="line">Linha</option>
+                                <option value="bar">Barras</option>
+                                <option value="doughnut">Pizza</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <canvas id="grafico"></canvas>
+                    </div>
+                </div>
+
+                <!-- Contato -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-envelope"></i> Contato</h2>
+                    </div>
+                    <div class="card-content">
+                        <form action="https://formsubmit.co/gabrielalvessr@gmail.com" method="POST">
+                            <div class="form-group">
+                                <label for="nome">Nome:</label>
+                                <input type="text" id="nome" name="nome" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email:</label>
+                                <input type="email" id="email" name="email" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="mensagem">Mensagem:</label>
+                                <textarea id="mensagem" name="mensagem" class="form-control" rows="3" required></textarea>
+                            </div>
+                            <input type="hidden" name="_subject" value="Contato Dashboard BI">
+                            <input type="hidden" name="_captcha" value="false">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Enviar Mensagem
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Senha -->
+    <div id="modalSenha" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-lock"></i> Acesso ao Sistema</h3>
+                <span class="close" onclick="fecharModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="senha">Digite a senha de acesso:</label>
+                    <input type="password" id="senha" class="form-control" placeholder="Senha">
+                    <small class="help-text">
+                        <strong>Dica:</strong> Use "123" para acesso padrão ou "premium" para acesso completo
+                    </small>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-primary" onclick="verificarSenha()">
+                        <i class="fas fa-check"></i> Verificar
+                    </button>
+                    <button class="btn btn-secondary" onclick="fecharModal()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Tipo de Gráfico -->
+    <div id="modalTipoGrafico" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-chart-bar"></i> Escolha o Tipo de Gráfico</h3>
+                <span class="close" onclick="fecharModalTipo()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="grafico-opcoes">
+                    <div class="opcao-grafico" onclick="selecionarTipoGrafico('line')">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Linha</span>
+                    </div>
+                    <div class="opcao-grafico" onclick="selecionarTipoGrafico('bar')">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Barras</span>
+                    </div>
+                    <div class="opcao-grafico" onclick="selecionarTipoGrafico('doughnut')">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Pizza</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
