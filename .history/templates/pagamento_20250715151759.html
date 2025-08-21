@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagamento - Plano {{ plano|capitalize }}</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    /* ... (mesmo estilo anterior, mantido) ... */
+    /* Remove a exibição visual do QR Code */
+    .hidden {
+        display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>💳 Finalizar Pagamento</h1>
+    </div>
+
+    <div class="plano-info">
+      <div class="plano-nome">
+        {% if plano == 'basico' %}
+          🚀 Plano Básico
+        {% elif plano == 'premium' %}
+          💎 Plano Premium
+        {% else %}
+          🔥 Plano Pro
+        {% endif %}
+      </div>
+      <div class="plano-preco">R$ {{ "%.2f"|format(valor) }}</div>
+      <div>Escolha sua forma de pagamento</div>
+    </div>
+
+    <div class="payment-methods">
+      <div class="payment-method active" id="pix-method" onclick="selectPaymentMethod('pix')">
+        <div class="method-header">
+          <div class="method-icon">📱</div>
+          <div class="method-title">PIX</div>
+        </div>
+        <div class="method-content">
+          <p><strong>Pagamento único</strong></p>
+          <p>Use a chave PIX abaixo para completar o pagamento</p>
+        </div>
+      </div>
+
+      <div class="payment-method" id="mercadopago-method" onclick="selectPaymentMethod('mercadopago')">
+        <div class="method-header">
+          <div class="method-icon">💰</div>
+          <div class="method-title">Mercado Pago</div>
+        </div>
+        <div class="method-content">
+          <p><strong>Assinatura mensal</strong></p>
+          <p>Cartão de crédito, débito ou saldo</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- PIX sem exibir QR Code -->
+    <div id="pix-form" class="payment-form active">
+      <div style="text-align: center; margin: 20px 0;">
+        <p><strong>Chave PIX:</strong> {{ chave_pix }}</p>
+        <p>Copie a chave acima e realize o pagamento pelo seu app bancário.</p>
+      </div>
+      <!-- QR escondido -->
+      <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code PIX" class="qr-code hidden">
+    </div>
+
+    <!-- Mercado Pago -->
+    <div id="mercadopago-form" class="payment-form">
+      <h3 style="text-align: center; margin-bottom: 20px;">Assinatura via Mercado Pago</h3>
+      {% if plano == 'basico' %}
+        <a href="https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=2c9380849763daeb0197697bbcd3023b" class="btn btn-mercadopago" target="_blank">
+          Assinar Plano Básico - R$ 25,00/mês
+        </a>
+      {% elif plano == 'premium' %}
+        <a href="https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=2c9380849764e81a0197697d371601cd" class="btn btn-mercadopago" target="_blank">
+          Assinar Plano Premium - R$ 50,00/mês
+        </a>
+      {% else %}
+        <a href="https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=2c9380849763daeb0197697dd346023d" class="btn btn-mercadopago" target="_blank">
+          Assinar Plano Pro - R$ 75,00/mês
+        </a>
+      {% endif %}
+    </div>
+
+    <div style="text-align: center; margin-top: 20px;">
+      <a href="/" style="color: #7f8c8d; text-decoration: none;">⬅️ Voltar aos planos</a>
+    </div>
+  </div>
+
+  <script>
+    function selectPaymentMethod(method) {
+      document.querySelectorAll('.payment-method').forEach(el => el.classList.remove('active'));
+      document.getElementById(method + '-method').classList.add('active');
+
+      document.querySelectorAll('.payment-form').forEach(el => el.classList.remove('active'));
+      document.getElementById(method + '-form').classList.add('active');
+    }
+  </script>
+</body>
+</html>

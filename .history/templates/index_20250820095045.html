@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard BI - Análise de Dados Profissional</title>
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" type="image/png">
     <style>
         * {
             margin: 0;
@@ -471,9 +472,19 @@
         {% endwith %}
 
         <div class="header">
-            <h1>📊 Dashboard BI Profissional</h1>
+            <h1>Dashboard BI Profissional</h1>
+        
+            <div class="nav-section" style="margin: 20px 0;">
+                <div class="nav-buttons">
+                    <a href="/bi" class="btn-nav btn-bi">📊 Dashboard Básico</a>
+                    <a href="/bi-pro" class="btn-nav" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">🔥 Dashboard Pro</a>
+                    <a href="/admin-login" class="btn-nav">🔐 Área Administrativa</a>
+                </div>
+            </div>
+        
             <p>Transforme seus dados em insights poderosos com nossa plataforma de análise avançada</p>
         </div>
+        
 
         <div class="plans-grid">
             <!-- Plano Básico -->
@@ -532,7 +543,7 @@
         </div>
 
         <div class="comparison-table">
-            <h2>📋 Comparação Detalhada dos Planos</h2>
+            <h2>📋Comparação Detalhada dos Planos</h2>
             <table class="table">
                 <thead>
                     <tr>
@@ -588,6 +599,17 @@
                 </tbody>
             </table>
         </div>
+        <div class="video-section" style="margin-top: 60px; text-align: center;">
+            <h2 style="color: #2c3e50; margin-bottom: 20px;">📺 Assista ao Tutorial Completo</h2>
+            <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;border-radius:15px;box-shadow:0 5px 20px rgba(0,0,0,0.1);">
+                <iframe src="https://www.youtube.com/embed/aioPUPO4osQ" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen 
+                        style="position:absolute;top:0;left:0;width:100%;height:100%;">
+                </iframe>
+            </div>
+        </div>        
 
         <div class="contact-section">
             <h2>📞 Entre em Contato</h2>
@@ -631,7 +653,7 @@
                         <i class="fas fa-envelope"></i>
                         <div>
                             <h4>E-mail</h4>
-                            <p>gabrielalvessr@gmail.com</p>
+                            <p>dashboardbiprofissional@gmail.com</p>
                         </div>
                     </div>
                     <div class="contact-item">
@@ -695,13 +717,13 @@
             </div>
         </div>
 
-        <div class="nav-section">
+        <!-- <div class="nav-section">
             <div class="nav-buttons">
-                <a href="/bi" class="btn-nav btn-bi"> Dashboard Básico</a>
+                <a href="/bi" class="btn-nav btn-bi">📊 Dashboard Básico</a>
                 <a href="/bi-pro" class="btn-nav" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">🔥 Dashboard Pro</a>
                 <a href="/admin-login" class="btn-nav">🔐 Área Administrativa</a>
             </div>
         </div>
-    </div>
+    </div> -->
 </body>
 </html>

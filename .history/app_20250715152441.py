@@ -1,18 +1,16 @@
 from flask import Flask, jsonify, request, render_template, redirect, url_for, session, flash, send_file
 from flask_sqlalchemy import SQLAlchemy
 import os
-import qrcode
+# import qrcode
 import io
 import base64
 import pandas as pd
 from datetime import datetime
 import json
 
-# === CONFIGURAÇÃO INICIAL ===
-
 app = Flask(__name__)
 
-# Usa /tmp na Vercel para suportar escrita
+# Configurações de ambiente
 BASE_DIR = '/tmp' if 'VERCEL' in os.environ else os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, 'clientes.db')
 
@@ -24,7 +22,6 @@ app.secret_key = 'sua_chave_secreta_super_segura_aqui_2024'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 db = SQLAlchemy(app)
 
-# Senha do administrador
 ADMIN_PASSWORD = 'admin2024'
 
 PRECOS = {
@@ -35,8 +32,6 @@ PRECOS = {
 
 STRIPE_PUBLIC_KEY = 'pk_test_sua_chave_publica_aqui'
 STRIPE_SECRET_KEY = 'sk_test_sua_chave_secreta_aqui'
-
-# === MODELOS ===
 
 class Cliente(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -64,19 +59,21 @@ if not os.path.exists(DB_PATH):
     with app.app_context():
         db.create_all()
 
-# === FUNÇÕES AUXILIARES ===
-
 # def gerar_qr_code_pix(valor, chave_pix="31995120154"):
-#     pix_payload = f"00020126580014br.gov.bcb.pix0136{chave_pix}520400005303986540{valor:.2f}5802BR5925Gabriel Alves6009SAO PAULO62070503***6304"
-#     qr = qrcode.QRCode(version=1, box_size=10, border=5)
-#     qr.add_data(pix_payload)
-#     qr.make(fit=True)
-#     img = qr.make_image(fill_color="black", back_color="white")
-#     buffer = io.BytesIO()
-#     img.save(buffer, format='PNG')
-#     buffer.seek(0)
-#     img_base64 = base64.b64encode(buffer.getvalue()).decode()
-#     return img_base64
+#     try:
+#         valor_float = float(valor)
+#         payload = f"00020126580014br.gov.bcb.pix0136{chave_pix}520400005303986540{valor_float:.2f}5802BR5925Gabriel Alves6009SAO PAULO62070503***6304"
+#         qr = qrcode.QRCode(version=1, box_size=10, border=5)
+#         qr.add_data(payload)
+#         qr.make(fit=True)
+#         img = qr.make_image(fill_color="black", back_color="white")
+#         buffer = io.BytesIO()
+#         img.save(buffer, format='PNG')
+#         buffer.seek(0)
+#         return base64.b64encode(buffer.getvalue()).decode()
+#     except Exception as e:
+#         print("❌ Erro ao gerar QR Code:", e)
+#         return None
 
 def processar_arquivo_dados(arquivo):
     try:
@@ -99,8 +96,6 @@ def processar_arquivo_dados(arquivo):
         }, None
     except Exception as e:
         return None, f"Erro ao processar arquivo: {str(e)}"
-
-# === ROTAS ===
 
 @app.route('/')
 def index():
@@ -146,13 +141,17 @@ def pagamento(plano):
         if plano not in PRECOS:
             flash('Plano inválido!', 'error')
             return redirect(url_for('index'))
-        
+
         valor = PRECOS[plano]
-        
+        qr_code = gerar_qr_code_pix(valor)
+        if not qr_code:
+            raise Exception("QR Code inválido")
+
         return render_template(
             'pagamento.html',
             plano=plano,
             valor=valor,
+            qr_code=qr_code,
             chave_pix="31995120154",
             stripe_public_key=STRIPE_PUBLIC_KEY
         )

@@ -66,17 +66,17 @@ if not os.path.exists(DB_PATH):
 
 # === FUNÇÕES AUXILIARES ===
 
-# def gerar_qr_code_pix(valor, chave_pix="31995120154"):
-#     pix_payload = f"00020126580014br.gov.bcb.pix0136{chave_pix}520400005303986540{valor:.2f}5802BR5925Gabriel Alves6009SAO PAULO62070503***6304"
-#     qr = qrcode.QRCode(version=1, box_size=10, border=5)
-#     qr.add_data(pix_payload)
-#     qr.make(fit=True)
-#     img = qr.make_image(fill_color="black", back_color="white")
-#     buffer = io.BytesIO()
-#     img.save(buffer, format='PNG')
-#     buffer.seek(0)
-#     img_base64 = base64.b64encode(buffer.getvalue()).decode()
-#     return img_base64
+def gerar_qr_code_pix(valor, chave_pix="31995120154"):
+    pix_payload = f"00020126580014br.gov.bcb.pix0136{chave_pix}520400005303986540{valor:.2f}5802BR5925Gabriel Alves6009SAO PAULO62070503***6304"
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(pix_payload)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    buffer = io.BytesIO()
+    img.save(buffer, format='PNG')
+    buffer.seek(0)
+    img_base64 = base64.b64encode(buffer.getvalue()).decode()
+    return img_base64
 
 def processar_arquivo_dados(arquivo):
     try:
@@ -146,20 +146,21 @@ def pagamento(plano):
         if plano not in PRECOS:
             flash('Plano inválido!', 'error')
             return redirect(url_for('index'))
-        
+
         valor = PRECOS[plano]
-        
+        qr_code = gerar_qr_code_pix(valor)
+
         return render_template(
             'pagamento.html',
             plano=plano,
             valor=valor,
+            qr_code=qr_code,
             chave_pix="31995120154",
             stripe_public_key=STRIPE_PUBLIC_KEY
         )
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return f"Erro interno no servidor: {str(e)}", 500
+        print(f"❌ Erro em /pagamento/{plano}: {e}")
+        return "Erro interno no servidor", 500
 
 @app.route('/confirmar-pagamento', methods=['POST'])
 def confirmar_pagamento():

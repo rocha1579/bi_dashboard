@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pagamento - {{ plano.title() }}</title>
+    <title>Pagamento - Plano {{ plano|capitalize }}</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" type="image/png">
     <style>
         /* Estilos básicos mantidos */
         * {
@@ -181,7 +182,6 @@
         </div>
 
         <div class="payment-methods">
-            <!-- PIX -->
             <div class="payment-method active" id="pix-method" onclick="selectPaymentMethod('pix')">
                 <div class="method-header">
                     <div class="method-icon">📱</div>
@@ -193,7 +193,6 @@
                 </div>
             </div>
 
-            <!-- Mercado Pago -->
             <div class="payment-method" id="mercadopago-method" onclick="selectPaymentMethod('mercadopago')">
                 <div class="method-header">
                     <div class="method-icon">💰</div>
@@ -207,20 +206,20 @@
         </div>
 
         <!-- Formulário PIX -->
-        <div id="pix-form" class="payment-form active">
-            <h3 style="text-align: center; margin-bottom: 15px;">QR Code Banco Inter</h3>
-            <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-5RZOigbFMaQ7g8JH1Gs9rmSpSKxWG9.png" alt="QR Code PIX Banco Inter" class="qr-code">
-            
-            <div style="text-align: center; margin: 15px 0;">
-                <p><strong>Nome:</strong> GABRIEL ROCHA ALVES</p>
-                <p><strong>Chave PIX:</strong> (31) 99512-0154</p>
-            </div>
-        </div>
+        <!-- Formulário PIX -->
+<div id="pix-form" class="payment-form active">
+    <div style="text-align: center; padding: 30px; background: #f8f9fa; border-radius: 10px; margin: 20px 0;">
+        <h3 style="color: #2c3e50; margin-bottom: 15px;">💳 Pagamento via PIX</h3>
+        <p style="font-size: 1.1rem; margin-bottom: 10px;"><strong>Chave PIX:</strong></p>
+        <p style="font-size: 1.3rem; color: #3498db; font-weight: bold; background: white; padding: 10px; border-radius: 5px; border: 2px dashed #3498db;">{{ chave_pix }}</p>
+        <p style="margin-top: 15px; color: #7f8c8d;">Copie a chave PIX acima e cole no seu app de pagamentos</p>
+        <p style="margin-top: 10px; font-weight: bold; color: #2c3e50;">Valor: R$ {{ "%.2f"|format(valor) }}</p>
+    </div>
+</div>
 
         <!-- Formulário Mercado Pago -->
         <div id="mercadopago-form" class="payment-form">
             <h3 style="text-align: center; margin-bottom: 20px;">Assinatura via Mercado Pago</h3>
-            
             {% if plano == 'basico' %}
                 <a href="https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=2c9380849763daeb0197697bbcd3023b" class="btn btn-mercadopago" target="_blank">
                     Assinar Plano Básico - R$ 25,00/mês
@@ -243,13 +242,11 @@
 
     <script>
         function selectPaymentMethod(method) {
-            // Atualizar visual dos métodos
             document.querySelectorAll('.payment-method').forEach(el => {
                 el.classList.remove('active');
             });
             document.getElementById(method + '-method').classList.add('active');
-            
-            // Mostrar formulário correspondente
+
             document.querySelectorAll('.payment-form').forEach(el => {
                 el.classList.remove('active');
             });

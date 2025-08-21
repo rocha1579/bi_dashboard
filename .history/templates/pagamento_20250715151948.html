@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pagamento - Plano {{ plano|capitalize }}</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" type="image/png">
     <style>
         /* Estilos básicos mantidos */
         * {
@@ -206,16 +205,12 @@
         </div>
 
         <!-- Formulário PIX -->
-        <!-- Formulário PIX -->
-<div id="pix-form" class="payment-form active">
-    <div style="text-align: center; padding: 30px; background: #f8f9fa; border-radius: 10px; margin: 20px 0;">
-        <h3 style="color: #2c3e50; margin-bottom: 15px;">💳 Pagamento via PIX</h3>
-        <p style="font-size: 1.1rem; margin-bottom: 10px;"><strong>Chave PIX:</strong></p>
-        <p style="font-size: 1.3rem; color: #3498db; font-weight: bold; background: white; padding: 10px; border-radius: 5px; border: 2px dashed #3498db;">{{ chave_pix }}</p>
-        <p style="margin-top: 15px; color: #7f8c8d;">Copie a chave PIX acima e cole no seu app de pagamentos</p>
-        <p style="margin-top: 10px; font-weight: bold; color: #2c3e50;">Valor: R$ {{ "%.2f"|format(valor) }}</p>
-    </div>
-</div>
+        <div id="pix-form" class="payment-form active">
+            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code PIX" class="qr-code">
+            <div style="text-align: center; margin: 15px 0;">
+                <p><strong>Chave PIX:</strong> {{ chave_pix }}</p>
+            </div>
+        </div>
 
         <!-- Formulário Mercado Pago -->
         <div id="mercadopago-form" class="payment-form">
